@@ -1,10 +1,6 @@
 # Wayfair EU Supplier Marketing — Claude Code Plugin
 
-A Claude Code plugin that loads the working context, rules, glossary, data-set
-schemas, and analytical frameworks used by the Wayfair EU Supplier Marketing
-analyst. Once installed, Claude will automatically apply the rules (e.g. "never
-show GRS to suppliers", "use Wholesale ROAS in supplier-facing decks") in any
-session where you start working with WSP / WSC / Castlegate / pitch-deck tasks.
+A Claude Code plugin that loads the working context, non-negotiable rules, glossary, MBR data-set schemas, and analytical frameworks used by the Wayfair EU Supplier Marketing analyst. Auto-activates whenever you start working with WSP / WSC / Castlegate / supplier pitch-deck tasks. Format follows the [Agent Skills](https://github.com/coreyhaines31/marketingskills) convention used by Corey Haines' marketingskills and the [OpenClaudia](https://github.com/OpenClaudia/openclaudia-skills) catalogue.
 
 ## What's inside
 
@@ -14,18 +10,37 @@ wayfair-eu-supplier-marketing/
 │   └── plugin.json
 └── skills/
     └── wayfair-eu-supplier-marketing/
-        └── SKILL.md   ← all the rules, glossary, frameworks, output standards
+        └── SKILL.md
 ```
 
-The skill auto-activates on relevant context (WSP data, MBR SET 1/2/3, supplier
-pitch decks, ROAS / WSC / Castlegate / cap-hit analysis, Way Day, etc.). You
-can also invoke it explicitly with `/wayfair-eu-supplier-marketing` once
-installed.
+`SKILL.md` carries:
+- 🔴 Non-negotiable rules (no GRS on supplier-facing material, Wholesale ROAS only, Evergreen ≠ Priority)
+- 📖 Full Wayfair glossary
+- 📊 MBR SET 1 / 2 / 3 + portfolio table schemas + Way Day share-shift
+- 🧮 Data cleaning checklist
+- 🎯 Five analytical frameworks (ROAS gap reframe, WSC correlation, cap-hit, 5%-of-WSC budget, portfolio prioritisation)
+- 📐 .pptx output standards + EU purple brand palette
+- 🗣️ Working style + persistent context doc convention (`.agents/wayfair-supplier-context.md`)
 
-## Install — Option A: as a personal skill (simplest)
+## Install
 
-If you just want it in your own Claude Code sessions, copy the skill into your
-user-level skills directory:
+### Option A — Claude Code plugin (recommended)
+
+From any Claude Code session:
+
+```
+/plugin install ./wayfair-eu-supplier-marketing
+```
+
+Or, after this branch is merged, install directly from GitHub:
+
+```
+/plugin install faizanshabbir777-cmd/claude-quickstarts/wayfair-eu-supplier-marketing
+```
+
+(`/plugin` syntax may vary by Claude Code version — see the Claude Code plugin docs.)
+
+### Option B — Personal skill (no plugin manager)
 
 ```bash
 mkdir -p ~/.claude/skills
@@ -33,31 +48,11 @@ cp -r wayfair-eu-supplier-marketing/skills/wayfair-eu-supplier-marketing \
       ~/.claude/skills/
 ```
 
-Then start a new Claude Code session — the skill will be auto-discovered.
+Start a new Claude Code session — the skill will be auto-discovered.
 
-## Install — Option B: as a plugin (shareable)
+### Option C — Project-level
 
-Plugins can be installed from a local path or a git repository. From this
-repo's root:
-
-```bash
-# Inside any Claude Code session
-/plugin install ./wayfair-eu-supplier-marketing
-```
-
-Or, after pushing this branch / merging to main, install directly from GitHub:
-
-```bash
-/plugin install faizanshabbir777-cmd/claude-quickstarts/wayfair-eu-supplier-marketing
-```
-
-(Exact `/plugin` syntax may evolve — see the Claude Code plugin docs for the
-current command.)
-
-## Install — Option C: project-level
-
-To make this skill auto-load for everyone working in a specific repo, copy it
-into that repo's `.claude/skills/` directory and commit it:
+Commit the skill into a specific repo so everyone working there gets it:
 
 ```bash
 mkdir -p .claude/skills
@@ -66,16 +61,18 @@ cp -r /path/to/wayfair-eu-supplier-marketing/skills/wayfair-eu-supplier-marketin
 git add .claude/skills && git commit -m "Add Wayfair EU supplier marketing skill"
 ```
 
-## Using it in claude.ai (Projects)
+### Option D — claude.ai Projects (web app)
 
-If you also want this context in claude.ai chat (not just Claude Code), paste
-the contents of `skills/wayfair-eu-supplier-marketing/SKILL.md` (minus the YAML
-frontmatter) into a Claude Project's "Custom Instructions" or "Project
-Knowledge" panel.
+Skills only auto-load in Claude Code. For the claude.ai web app, paste the contents of `skills/wayfair-eu-supplier-marketing/SKILL.md` (everything below the YAML frontmatter) into a Claude Project's custom instructions / project knowledge panel.
+
+## How activation works
+
+The skill's YAML `description` lists trigger phrases — anything containing WSP, MWSP, WSC, GRS, Wholesale ROAS, Castlegate, CG penetration, cap-hit, Way Day, MBR SET 1/2/3, the campaign codes RE / VE / OE / OU, or supplier-summit pitch-deck language will auto-pull it in. You can also force-load with `/wayfair-eu-supplier-marketing`.
+
+## Persistent supplier context
+
+For projects lasting longer than one session, drop a `.agents/wayfair-supplier-context.md` next to the work — the skill checks for it on entry and won't re-ask facts already captured there. Suggested sections: suppliers in scope (name, SuID, SRM, category, WSC band), currency convention, latest landed-month WSC per supplier, known data caveats, open pitches and their evidence pillars.
 
 ## Updating
 
-Edit `skills/wayfair-eu-supplier-marketing/SKILL.md` and re-install / re-copy.
-The `description:` field in the YAML frontmatter is what tells Claude when to
-auto-activate the skill — keep the trigger keywords there current as the
-analyst's workflow evolves.
+Edit `skills/wayfair-eu-supplier-marketing/SKILL.md`, bump `metadata.version` in the frontmatter and `version` in `plugin.json`, then re-install / re-copy. Keep the `description:` trigger keywords current as the analyst's workflow evolves.

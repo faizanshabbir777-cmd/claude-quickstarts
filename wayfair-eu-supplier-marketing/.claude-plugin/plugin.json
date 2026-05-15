@@ -1,18 +1,12 @@
 {
   "name": "wayfair-eu-supplier-marketing",
-  "version": "0.1.0",
-  "description": "Working context, rules, glossary, and analytical frameworks for the Wayfair EU Supplier Marketing analyst. Loaded automatically when analysing Wayfair Sponsored Products (WSP) data, building supplier-facing pitch decks, or working with WSC/GRS/ROAS/Castlegate concepts.",
+  "description": "Wayfair EU Supplier Marketing analyst skill — Wayfair Sponsored Products (WSP) analysis, supplier-facing pitch decks, WSC/GRS/wRoAS handling, Castlegate (CG) penetration narrative, cap-hit and 5%-of-WSC budget frameworks, MBR data-set cleaning, Way Day share-shift analysis.",
+  "version": "0.2.0",
   "author": {
     "name": "Wayfair EU Supplier Marketing"
   },
-  "keywords": [
-    "wayfair",
-    "wsp",
-    "sponsored-products",
-    "supplier-marketing",
-    "pitch-deck",
-    "roas",
-    "wsc",
-    "castlegate"
-  ]
+  "homepage": "https://github.com/faizanshabbir777-cmd/claude-quickstarts/tree/main/wayfair-eu-supplier-marketing",
+  "repository": "https://github.com/faizanshabbir777-cmd/claude-quickstarts",
+  "license": "MIT",
+  "skills": "./skills"
 }
