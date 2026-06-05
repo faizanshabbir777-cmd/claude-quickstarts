@@ -627,3 +627,73 @@ A real worked example for sanity-checking new pitches.
 | The ask | Set May WSP at £10k, refresh monthly at 5% of last month's WSC |
 
 For most CTM-Poland-tier suppliers expect: catalogue 800–2000 SKUs, engine 5–10% of catalogue driving 75–85% of WSC, CG OTD 3–7 days vs drop-ship 20–30, ROAS £3–8 per £1.
+
+---
+
+## §F — Storyboards & subagent pipeline
+
+This skill ships with **named storyboards** for every recurring pitch type, and a **3-subagent pipeline** for building decks against them. This is what stops decks from drifting off-script.
+
+### Storyboards (in `storyboards/`)
+
+Every deck is built from a storyboard, not from scratch. The storyboard is a markdown file with YAML frontmatter that declares:
+
+- `applies_when:` — selector rules (when to use this storyboard)
+- `slide_count:` — fixed
+- `required_data:` — the fields the agent must have in `deck_data.json`
+- `canonical_example:` — the reference deck this pattern mirrors
+- `ask:` — variant + template message
+
+Per-slide scaffold inside the markdown:
+- `LAYOUT:` — named layout (maps to a render function — see §F.3)
+- `EYEBROW:` — exact eyebrow text including numbering
+- `TITLE_EXAMPLES:` — 3-5 conversational sentence options the agent picks from
+- Element list with required values
+
+Available storyboards:
+
+| Storyboard | When |
+|---|---|
+| `value-review-variant-b.md`     | Supplier at/above 4-5% benchmark; ask is "continue" |
+| `restart-pitch-variant-a.md`    | Supplier dark ≥2 months; ask is "switch back on" |
+| `switch-to-5pct-variant-c.md`   | Supplier active but under-spending (<3% WSC) or erratic |
+| `promo-recap-tier0.md`          | Way Day / BFCM / Cyber Week / etc. |
+| `summit-case-study.md`          | Multi-supplier public showcase, numbers stripped |
+| `mbr-supplier-review.md`        | Internal MBR — em-dash titles, dense tiles, GRS permitted |
+| `portfolio-outreach.md`         | Cross-supplier ranking — outputs a list, not a deck |
+
+The selector lives in `storyboards/selector.md` — a decision tree that picks the right storyboard from a brief.
+
+### Subagent pipeline (in `agents/`)
+
+Three specialised subagents — install to `~/.claude/agents/` and the skill delegates automatically:
+
+| Subagent | Role |
+|---|---|
+| `wsp-data-prep.md`     | Ingest source files, clean, compute, write `deck_data.json` |
+| `wsp-deck-author.md`   | Pick storyboard, validate data, fill the scaffold, produce `slides.md` (with `[HINT: layout]` markers) |
+| `wsp-deck-renderer.md` | Map each `[HINT:]` to a render function, build the `.pptx`, run the QA loop |
+
+The pipeline mirrors the `pptx-from-layouts-skill` pattern: profile → author → render. Each subagent has a single job and hands off to the next via the file system. The analyst is invited to checkpoint between subagents (especially before render).
+
+### Layout-to-code mapping
+
+Each `[HINT: layout_name]` corresponds to a python-pptx render function. The list of named layouts and which storyboard uses each lives in `agents/wsp-deck-renderer.md`. The render functions themselves live in `scripts/render_layouts.py` (build per layout on first use; the Monty and Forte v2 build scripts in `outputs/` are working examples).
+
+### Two visual registers
+
+| Register | When | Distinguishing features |
+|---|---|---|
+| **TuttiBambini** (default) | All supplier-facing decks | Liberation Serif Bold Italic titles + hero numbers, numbered purple eyebrows, lavender + deep purple + gold cards, green delta pills, italic takeaway sentences |
+| **Internal MBR** | `mbr-supplier-review.md` only | Em-dash titles, dense KPI tiles with bps deltas, full data tables, INTERNAL ONLY footer |
+
+The storyboard declares which register; the renderer enforces it.
+
+### Why this exists
+
+Without storyboards, every deck is reinvented. The agent has to decide slide count, eyebrow numbering, layout per slide, title pattern — and gets it wrong in small ways that compound. Outputs drift toward generic "AI deck" aesthetics.
+
+With storyboards, the agent fills a pre-defined scaffold. The TuttiBambini baseline is reproduced consistently. New SAMs onboard by reading the storyboards, not by reverse-engineering a polished example.
+
+**This is the difference between "AI builds decks" and "the team playbook builds decks, and AI does the typing."**
+

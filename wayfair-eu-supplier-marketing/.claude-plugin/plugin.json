@@ -1,7 +1,7 @@
 {
   "name": "wayfair-eu-supplier-marketing",
   "description": "Wayfair EU Supplier Marketing analyst plugin — Wayfair Sponsored Products (WSP) analysis, supplier-facing pitch decks, MBR data handling, promo recaps (Way Day, BFCM, etc.), Castlegate/RTV reframe, 5%-of-WSC budget framework. Bundles two skills (foundation + promo) and the /wsp slash command.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": {
     "name": "Wayfair EU Supplier Marketing"
   },
