@@ -1,9 +1,24 @@
-# Hand-off note — while [Your name] is on leave
+# Hand-off note — while Faizan is on medical leave
 
-**What it is.** A Claude Code plugin that builds Wayfair supplier pitch decks end-to-end. Code lives in `wayfair-eu-supplier-marketing/`. See `QUICKSTART.md` to install and try it.
+**Cover:** Brian Delsignore.
+**Out:** [start date] → [return date].
+**For urgent questions on this plugin, Brian has the artefacts and the storyboard. If anything needs me specifically, leave it in my inbox — I'll handle it on day one back.**
 
-**How to demo it.** Open `Demo_Storyboard.pdf` (sent alongside this) and follow the 8 beats. Type the 3 prompts in the cheat sheet. The Monty Trading example deck is in `outputs/Monty_Trading_April2026_WSP_Deck.pdf` — use it to show what the plugin produces.
+---
 
-**Where the files are.** Plugin code: this folder. Worked decks: `outputs/`. One-pager for Clement: `Clement_OnePager.pdf`. Demo storyboard: `Demo_Storyboard.pdf`. Source data: `data/` (Monty xlsx + Forte CSVs + the March '26 MBR reference deck).
+**What it is.** A Claude Code plugin that builds Wayfair supplier pitch decks end-to-end. Codifies the EU Supplier Marketing playbook — hard rules, brand system, QA loop, four pitch variants — into an installable skill. Code lives in `wayfair-eu-supplier-marketing/`. See `QUICKSTART.md` to install and try it.
 
-**When I'm back.** [date]. If anything urgent comes up before then, [colleague name] has watched the demo and can field basic questions. For anything that needs me, leave it in my inbox — I'll handle it on day one back.
+**How to demo it.** Open `Demo_Storyboard_90s.pdf` (or the 3-minute version) and follow the beats. Type the 3 prompts from the cheat sheet. The Monty Trading example deck is in `outputs/Monty_Trading_April2026_WSP_Deck.pdf` — use it to show what the plugin produces.
+
+**Where the files are.**
+- Plugin code: this folder (`wayfair-eu-supplier-marketing/`)
+- Worked decks: `outputs/`
+- One-pager for Clement: `Clement_OnePager.pdf`
+- Demo storyboards: `Demo_Storyboard.pdf` (3-min) and `Demo_Storyboard_90s.pdf` (90-sec)
+- Source data the plugin was tested on: `data/`
+
+**When I'm back.** [return date]. Anything not urgent → wait. Anything urgent → Brian has context; the 90-second video shows the value in under two minutes if it needs surfacing in a meeting before I'm back.
+
+---
+
+*Faizan Shabbir · EU Wayfair Sponsored Products Lead*
