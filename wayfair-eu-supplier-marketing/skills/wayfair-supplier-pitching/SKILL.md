@@ -307,6 +307,30 @@ This visualizes the damage that was prevented (the gap between Cap-Only and Actu
 
 **Plain-English footer**: "The cap alone would have run £Z. Pulling [Month] forward lifted you to £Y — and you still lost −Npt of share."
 
+### The dark-days calendar visualisation
+
+**Use when**: a supplier had WSP running, paused it, and you need to visualise the gap day-by-day.
+
+**The strongest visual in the playbook.** Each day in the relevant window is a small vertical block:
+- **Purple block** (`#7B189F`) = WSP running that day
+- **Grey block** (`#CFC7D6`) = WSP switched off / out of budget
+
+Above the calendar:
+- Gold tab labelled `"WAY DAY"` (or whichever promo) marking the event window with a thin gold line below it
+- CORAL tab labelled `"X DAYS DARK"` over the contiguous grey stretch with a coral line below it
+- CORAL `"TODAY: OFF"` annotation if relevant on the last block
+
+Below the calendar:
+- Day numbers (every 7 days) and month labels — small grey Calibri
+
+Pair the calendar with two cards below it:
+- **LEFT (CORAL bg, deep coral left stripe)** `"WHILE IT WAS DARK"` — CORAL Georgia Bold Italic hero (`"~£15k"`) + plain sub-line (`"of wholesale revenue likely missed over those 12 days"`)
+- **RIGHT (LAVENDER bg, purple left stripe)** `"THE PATTERN"` — DEEP purple Georgia Bold Italic hero (`"On = sales"`) + plain sub-line (`"off = silence. The budget keeps running out mid-month."`)
+
+Italic takeaway sentence at slide bottom: *"Every day WSP is off, you stop showing up to ready-to-buy shoppers — and a competitor takes that slot."*
+
+This pattern lives on Restart pitches (Variant A) and on any pitch where wallet-at-zero days are part of the story. It is the most-quoted slide in the TuttiBambini reference deck.
+
 ---
 
 ## Portfolio prioritisation (cross-supplier work)
@@ -363,6 +387,96 @@ y=6.5–7.3     Plain-English footer band (deep purple, gold left-stripe)
 - Eyebrow: "IN PLAIN ENGLISH" in gold sans, 9pt, bold, letter-spaced 2.5
 - Body: single Georgia italic sentence, white, 12–14pt
 - The sentence should pass the **mother test** — would the supplier's non-marketing-trained mother understand it?
+
+### The TuttiBambini convention — visual reference baseline
+
+The canonical reference deck for this skill is the **TuttiBambini Way Day 2026 deck** (Faizan Shabbir, EU WSP Lead, prepared for Tapanshi Agrawal, EU youth-captain brand AM). Every supplier-pitch deck built with this skill should be visually indistinguishable from that reference. The rules below codify what that means.
+
+**Cover slide convention:**
+- Full-slide DEEP purple background
+- White Wayfair logo top-left at 10% slide width
+- **Numbered gold eyebrow** at ~20% slide height: `"{SUPPLIER NAME} · WAYFAIR SPONSORED PRODUCTS"` in letter-spaced small caps, ~14pt
+- **Hero title**: Georgia Bold Italic, ~64–80pt, white, one short sentence, ends in a full stop. Examples: *"Switch your WSP back on."*, *"Keep your WSP on at this pace."*, *"The pivot is paying."* Direct, conversational, period at the end.
+- **Italic subtitle**: Georgia Italic, ~22pt, white, two lines max, explaining the context.
+- **4-card KPI ribbon** along the bottom (~70% of slide height down):
+  - Card bg: LAVENDER (`#F6EBFB`)
+  - Top stripe: GOLD (`#D4A017`) for positive metrics, CORAL (`#B83A3A`) for negative/loss metrics (e.g., "days WSP went dark")
+  - Small purple eyebrow label, ~13pt letter-spaced
+  - Hero number: Georgia Bold Italic, ~48–56pt, DEEP purple
+  - Sub-line: Calibri, ~12pt, INK
+- **Footer line** at bottom of cover: Calibri ~12pt, light-lavender on deep — format: `"{Period} · prepared for {AM name} · UK · GBP"`
+
+**Numbered eyebrows on every analytical slide:**
+
+Each analytical slide opens with a small-caps letter-spaced eyebrow in PURPLE:
+- `"01 · WHAT WSP WAS DRIVING"`
+- `"02 · WAY DAY 2026 RECAP"`
+- `"03 · THE PROBLEM"` (use CORAL instead of purple for problem-framed slides)
+- `"04 · THE BIGGER PICTURE"`
+- `"05 · WHERE WE GO FROM HERE"`
+
+Numbering runs across the deck regardless of slide count. Eyebrow font: Calibri Bold ~10pt, letter-spaced 2.5–3.
+
+**Title convention:**
+
+Every content slide title is Georgia Bold Italic, ~30–40pt, INK on white. Always a sentence (not a label). Always ends with a full stop. Read like a story. Examples:
+- *"When it is on, WSP turns small spend into big wholesale revenue."*
+- *"Way Day proved it: you put more in, and a lot more came out."*
+- *"Right after Way Day, your WSP went dark — and the orders stopped."*
+- *"Lock in the rhythm — same return, no surprises."*
+
+**The lavender-hero-stat card (recurring across decks):**
+
+The signature element on the YTD-value slide:
+- LAVENDER bg (`#F6EBFB`), no top stripe required, ~7" wide × ~4" tall
+- Small purple eyebrow at top: e.g. `"SO FAR IN 2026"`
+- HUGE hero stat in Georgia Bold Italic, ~120pt, DEEP purple: e.g. `"£17"` or `"£5.71"`
+- Plain explanation underneath: `"of wholesale revenue for every £1 of WSP spend"`
+- Three label/value rows: `You spent — £6.8k on WSP`, `It drove — £114.2k wholesale`, `That's — 1 in 17 — a strong return`
+
+**The deep-purple 3-column KPI band (the "Way Day proved it" pattern):**
+
+For YoY or promo-vs-pre comparisons:
+- DEEP purple wide card (~70% slide width)
+- 3 columns separated by hairline vertical dividers
+- Each column: gold eyebrow label + huge white Georgia Bold Italic hero + grey "from £X" sub-line + GREEN PILL with the delta
+- **Green delta pills**: rounded rectangle (8pt radius), `#0E8F60` fill, white Calibri Bold ~14pt text, format `"×1.9"` or `"+£22k"` or `"Held"`
+
+**Italic takeaway sentences (mandatory on analytical slides):**
+
+Every analytical slide ends with one italic Georgia sentence at the bottom — a "take-away" that compresses the slide into plain English. Examples:
+- *"Take-away: your WSP has paid back about £17 for every £1 — the engine works whenever it is running."*
+- *"Every day WSP is off, you stop showing up to ready-to-buy shoppers — and a competitor takes that slot."*
+
+The takeaway sentence sits OUTSIDE any card, at the slide bottom, ~14pt Georgia Italic in INK.
+
+**The Ask slide convention (closing slide for any variant):**
+
+- White slide background
+- Three LAVENDER cards with GOLD top stripes spanning the top half:
+  - Card 1: `"IT WORKS"` — proof number (e.g., `£17 / £1`)
+  - Card 2: `"GOING DARK COSTS YOU"` (Variant A) or `"IT HELD AT SCALE"` (Variant B) or `"WHAT ERRATIC SPEND COST"` (Variant C)
+  - Card 3: `"A SIMPLE RULE"` — `5%`
+- **THE ASK card**: full-width DEEP purple card at the bottom (~25% slide height)
+  - Gold eyebrow: `"THE ASK"` letter-spaced
+  - One sentence in Calibri/Calibri Bold mix:
+    - *"Switch WSP back on now at **~£4,400 / month** — 5% of last month's wholesale revenue (~£87k), set on day 1 so it never goes dark mid-month."*
+    - The £-amount itself is highlighted in GOLD bold
+- Italic closing line at the very bottom: three clauses separated by `·`, Georgia Italic ~14pt — *"Proven £17 back for every £1 · currently leaving wholesale revenue on the table · one rule, live on day 1."*
+
+**Whitespace rule:**
+
+Every TuttiBambini slide has 2–3 visual elements maximum (1 chart + 1 card, or 2 cards, or 1 KPI band + 1 callout). Never more. If a slide has more than 3 elements, split it or drop the weakest one. The whitespace is what makes the deck look like an Apple keynote rather than a dashboard.
+
+**Coral colour for problem framing:**
+
+When the slide narrative is about loss or risk (e.g., "12 days dark = ~£15k missed"), the slide gets:
+- CORAL eyebrow (instead of purple)
+- CORAL-tinted card backgrounds (light coral `#FCE8E8`)
+- CORAL hero numbers in Georgia Bold Italic
+- This signals "the problem section" of the deck visually
+
+Pair every problem-framed slide with a counterpoint pattern panel (lavender card, deep purple hero), so the reader's eye doesn't drown in red.
 
 ### Python build stack
 
