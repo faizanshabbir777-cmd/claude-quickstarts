@@ -1,0 +1,28 @@
+# Render Blueprint — WSP Pitch Builder
+# Deploy this app to Render in 3 minutes by clicking the "Deploy to Render"
+# button in DEPLOY.md, or by following the manual steps below.
+#
+# Free tier: 750 hours/month (enough for 24/7 for ~1 month).
+# Wakes from idle in ~30 seconds. No credit card required for the free tier.
+
+services:
+  - type: web
+    name: wsp-builder
+    runtime: python
+    region: frankfurt              # EU data residency (Frankfurt or Oregon)
+    plan: free                     # 750 hrs/month free
+    branch: main
+    rootDir: wayfair-eu-supplier-marketing/dashboard
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run app.py --server.port=$PORT --server.address=0.0.0.0 --server.enableCORS=false --server.enableXsrfProtection=true --browser.gatherUsageStats=false
+    healthCheckPath: /_stcore/health
+    autoDeploy: true               # auto-redeploys on every push to main
+    envVars:
+      - key: STREAMLIT_SERVER_HEADLESS
+        value: "true"
+      - key: STREAMLIT_BROWSER_GATHER_USAGE_STATS
+        value: "false"
+      # The pilot password — set this in the Render dashboard under
+      # Environment Variables (DO NOT commit the actual value)
+      - key: WSP_PASSWORD
+        sync: false                # Render will prompt to set this in the UI
