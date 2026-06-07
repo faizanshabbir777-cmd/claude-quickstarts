@@ -1,0 +1,18 @@
+# Streamlit Cloud config — matches the EURTA NART / InfoHub palette
+[theme]
+primaryColor = "#7C1384"
+backgroundColor = "#F8F4ED"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#282830"
+font = "sans serif"
+
+[server]
+maxUploadSize = 50
+enableXsrfProtection = true
+enableCORS = false
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
