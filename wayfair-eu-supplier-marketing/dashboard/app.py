@@ -47,7 +47,7 @@ st.set_page_config(
 # -------------------------------------------------------------------------
 def check_password():
     def password_entered():
-        configured = st.secrets.get("auth", {}).get("password", "wsp-pilot-2026")
+        configured = st.secrets.get("auth", {}).get("password", "Faizan's Claude Skill - EU WSP")
         if hmac.compare_digest(st.session_state["password_input"], configured):
             st.session_state["password_correct"] = True
             del st.session_state["password_input"]

@@ -13,7 +13,7 @@ This doc tells you what to do if something goes wrong.
 | Live URL | `https://wsp-builder.streamlit.app` (whatever URL came back from the Streamlit Cloud deploy) |
 | Repo | `github.com/faizanshabbir777-cmd/claude-quickstarts/tree/main/wayfair-eu-supplier-marketing` |
 | Streamlit Cloud dashboard | `share.streamlit.io` — sign in with Faizan's GitHub (he leaves you the password) |
-| Password for users | `wsp-pilot-2026` (rotate if pilot CMs leak it — see "Password rotation" below) |
+| Password for users | `Faizan's Claude Skill - EU WSP` (rotate if it leaks — see "Password rotation" below) |
 | Slack channel | `#wsp-pilot` |
 
 ---
@@ -85,7 +85,7 @@ If you suspect the pilot password has leaked beyond the intended CMs:
 
 1. Sign into `share.streamlit.io` with Faizan's GitHub
 2. Open the `wsp-builder` app → **Settings** → **Secrets**
-3. Replace the `password = "wsp-pilot-2026"` line with a new value (use a passphrase like `wsp-summer-2026-mar`)
+3. Replace the `password = "Faizan's Claude Skill - EU WSP"` line with a new value (use a memorable passphrase)
 4. Save — Streamlit auto-reloads the app
 5. DM the new password to the pilot CMs only
 

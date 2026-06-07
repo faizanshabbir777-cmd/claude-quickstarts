@@ -23,9 +23,9 @@ Streamlit Cloud connects to your GitHub repo and auto-deploys whenever you push.
 4. Click **"Advanced settings"** → **"Secrets"**. Paste this exactly:
    ```toml
    [auth]
-   password = "wsp-pilot-2026"
+   password = "Faizan's Claude Skill - EU WSP"
    ```
-   (You can change the password to anything — just share it with the pilot CMs.)
+   (You can rotate the password later — see `BRIAN_RUNBOOK.md` for the steps.)
 
 5. Click **"Deploy!"**. Wait ~90 seconds. The app boots, installs the requirements from `requirements.txt`, and the URL goes live.
 
@@ -33,7 +33,7 @@ Streamlit Cloud connects to your GitHub repo and auto-deploys whenever you push.
 
 Once it's deployed, send Brian + the 3-4 pilot CM Champions a Slack DM:
 
-> *"WSP Pitch Builder is live: https://wsp-builder.streamlit.app · Password: wsp-pilot-2026 · 90-second walkthrough video [Loom link]. Play with it this week, drop feedback in #wsp-pilot."*
+> *"WSP Pitch Builder is live: https://wsp-builder.streamlit.app · Password: `Faizan's Claude Skill - EU WSP` · 90-second walkthrough video [Loom link]. Play with it this week, drop feedback in #wsp-pilot."*
 
 ### Pushing updates
 

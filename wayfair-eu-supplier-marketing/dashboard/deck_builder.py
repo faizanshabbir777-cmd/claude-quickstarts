@@ -335,7 +335,12 @@ def render_ask(data: dict) -> Image.Image:
 # Top-level builder — Image[] → real .pptx bytes
 # ============================================================
 def build_deck_value_review_b(data: dict) -> bytes:
-    """Build a Variant B value-review deck. Returns .pptx bytes ready to download."""
+    """Build a Variant B value-review deck. Returns .pptx bytes ready to download.
+
+    Uses tempfiles (not BytesIO) for the PNG → python-pptx handoff because some
+    PowerPoint versions are picky about images embedded via memory streams.
+    """
+    import tempfile
     slides = [
         render_cover(data),
         render_value_story(data),
@@ -343,7 +348,6 @@ def build_deck_value_review_b(data: dict) -> bytes:
         render_ask(data),
     ]
 
-    # Save each as PNG in memory and embed in a real pptx
     from pptx import Presentation
     from pptx.util import Inches
 
@@ -352,19 +356,24 @@ def build_deck_value_review_b(data: dict) -> bytes:
     prs.slide_height = Inches(7.5)
     BLANK = prs.slide_layouts[6]
 
-    for slide_img in slides:
-        png_buf = io.BytesIO()
-        slide_img.save(png_buf, "PNG", optimize=True)
-        png_buf.seek(0)
-        s = prs.slides.add_slide(BLANK)
-        s.shapes.add_picture(png_buf, 0, 0,
-                              width=prs.slide_width,
-                              height=prs.slide_height)
+    # Save each PNG to a real tempfile (conventional) and embed via file path
+    with tempfile.TemporaryDirectory() as td:
+        for i, slide_img in enumerate(slides):
+            # Convert to RGB and save as a clean baseline PNG
+            if slide_img.mode != "RGB":
+                slide_img = slide_img.convert("RGB")
+            png_path = f"{td}/slide_{i}.png"
+            slide_img.save(png_path, "PNG", optimize=False)
 
-    out = io.BytesIO()
-    prs.save(out)
-    out.seek(0)
-    return out.read()
+            s = prs.slides.add_slide(BLANK)
+            s.shapes.add_picture(png_path, 0, 0,
+                                  width=prs.slide_width,
+                                  height=prs.slide_height)
+
+        out = io.BytesIO()
+        prs.save(out)
+        out.seek(0)
+        return out.read()
 
 
 # ============================================================
