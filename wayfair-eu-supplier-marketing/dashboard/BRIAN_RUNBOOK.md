@@ -1,6 +1,6 @@
 # While Faizan is out — Brian's runbook
 
-Faizan is out for 7 weeks from {DATE}. The WSP Pitch Builder is **production v1.0** and runs autonomously. CMs upload data → click Build → get a personalised deck. No Faizan-in-the-loop required.
+Faizan is out for 6 weeks from {DATE}. The WSP Pitch Builder is **production v1.0** and runs autonomously. CMs upload data → click Build → get a personalised deck. No Faizan-in-the-loop required.
 
 This doc tells you what to do if something goes wrong.
 
@@ -105,7 +105,7 @@ Don't write the new password in Slack `#wsp-pilot` — DM each CM separately.
 
 ---
 
-## What good looks like over 7 weeks
+## What good looks like over 6 weeks
 
 By the time Faizan is back, you want:
 

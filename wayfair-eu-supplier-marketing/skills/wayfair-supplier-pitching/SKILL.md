@@ -671,15 +671,18 @@ The selector lives in `storyboards/selector.md` — a decision tree that picks t
 
 ### Subagent pipeline (in `agents/`)
 
-Three specialised subagents — install to `~/.claude/agents/` and the skill delegates automatically:
+Three Phase 1 subagents — install to `~/.claude/agents/` and the skill delegates automatically:
 
-| Subagent | Role |
-|---|---|
-| `wsp-data-prep.md`     | Ingest source files, clean, compute, write `deck_data.json` |
-| `wsp-deck-author.md`   | Pick storyboard, validate data, fill the scaffold, produce `slides.md` (with `[HINT: layout]` markers) |
-| `wsp-deck-renderer.md` | Map each `[HINT:]` to a render function, build the `.pptx`, run the QA loop |
+| Subagent | Role | Phase |
+|---|---|---|
+| `wsp-data-prep.md`     | Ingest source files, clean, compute, write `deck_data.json` | Phase 1 |
+| `wsp-deck-author.md`   | Pick storyboard, validate data, fill the scaffold, produce `slides.md` (with `[HINT: layout]` markers) | Phase 1 |
+| `wsp-deck-renderer.md` | Map each `[HINT:]` to a render function, build the `.pptx`, run the QA loop | Phase 1 |
+| `wsp-locked-agent.md`  | **Phase 2 only.** Locked-pathway Claude agent that activates *only* through the WSP Pitch Builder dashboard's four registered endpoints (`dashboard.build_pitch`, `dashboard.sanity_check_data`, `dashboard.override_title`, `dashboard.send_to_srm`). Refuses free-form chat. Composes with the full skill but operates within the storyboard scaffold. See `agents/wsp-locked-agent.md` and `LEAVE_TERMS.md`. | Phase 2 |
 
-The pipeline mirrors the `pptx-from-layouts-skill` pattern: profile → author → render. Each subagent has a single job and hands off to the next via the file system. The analyst is invited to checkpoint between subagents (especially before render).
+The Phase 1 pipeline mirrors the `pptx-from-layouts-skill` pattern: profile → author → render. Each subagent has a single job and hands off to the next via the file system. The analyst is invited to checkpoint between subagents (especially before render).
+
+**Phase 2 (post-license).** When CM Champions get Claude Code licenses, the `wsp-locked-agent` activates inside the dashboard. It guarantees no off-script Claude usage can ship a supplier-facing deck: the dashboard is the only caller, the four pathways are the only entry points, the storyboard scaffold is the only structure. See `LEAVE_TERMS.md` for what waits until Faizan returns and `dashboard/SOPHIE_TRANSITION_PLAN.md` for the three transition gates.
 
 ### Layout-to-code mapping
 

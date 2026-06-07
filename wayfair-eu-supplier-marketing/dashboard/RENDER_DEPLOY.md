@@ -1,6 +1,6 @@
 # Render deploy — WSP Pitch Builder · 3-minute setup
 
-> The Render-hosted URL is the **active link** for the pilot bridge. No Claude license required. Stays up for the full 7-week leave.
+> The Render-hosted URL is the **active link** for the pilot bridge. No Claude license required. Stays up for the full 6-week leave.
 
 ---
 
@@ -115,7 +115,7 @@ That's it. The render.yaml + app.py do the rest.
 | **Starter** | $7/mo | Always-on, 512MB RAM, custom domain |
 | **Standard** | $25/mo | Always-on, 2GB RAM, faster CPU |
 
-The Free tier covers the entire 7-week pilot bridge with **zero cost**. If you want zero sleep delay, upgrade to Starter ($7/mo). Don't go beyond that — Streamlit + this workload doesn't need more than 512MB.
+The Free tier covers the entire 6-week pilot bridge with **zero cost**. If you want zero sleep delay, upgrade to Starter ($7/mo). Don't go beyond that — Streamlit + this workload doesn't need more than 512MB.
 
 ---
 

@@ -150,7 +150,7 @@ st.markdown("""
 # Production-grade banner — no longer demo-only
 st.success(
     "**Production v1.0** — drop your campaign reporting CSV in the Filters tab → click Build → "
-    "real personalised .pptx download. Faizan is out for 7 weeks · for issues contact Brian Delsignore · "
+    "real personalised .pptx download. Faizan is out for 6 weeks · for issues contact Brian Delsignore · "
     "data safety: [DATA_SAFETY.md](https://github.com/faizanshabbir777-cmd/claude-quickstarts/blob/main/wayfair-eu-supplier-marketing/dashboard/DATA_SAFETY.md)."
 )
 
