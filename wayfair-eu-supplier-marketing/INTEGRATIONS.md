@@ -23,7 +23,7 @@ The basic working version assumes the analyst manually exports data and drops it
 ```
 ┌────────────────┐       ┌──────────┐
 │ Looker dash    │──┐  ┌─│ Account  │
-│ (the SAM views)│  │  │ │ Overview │
+│ (the CM Champion views)│  │  │ │ Overview │
 └────────────────┘  │  │ └──────────┘
                     │  │
                     ▼  ▼
@@ -93,12 +93,12 @@ The skill pulls the data, does the rest.
 
 - Eliminates the most error-prone step (manual export → drop in folder)
 - Guarantees the deck and the dashboard agree (no version skew)
-- Lets the SAM build a deck from any dashboard URL — the storyboard doesn't change
+- Lets the CM Champion build a deck from any dashboard URL — the storyboard doesn't change
 
 ### Why this isn't in the basic version
 
 - Needs IT involvement for service-account credentials
-- Looker dashboards aren't standardised across the team — each SAM's dashboard is slightly different
+- Looker dashboards aren't standardised across the team — each CM Champion's dashboard is slightly different
 - Pilot's job: find the 2-3 canonical dashboard layouts, build adapters for each
 
 ---
@@ -141,14 +141,14 @@ The skill queries the standard EU WSP dataset for SuID 37802, April 2026 + 12-mo
 ### Why this matters
 
 - Lets the skill compute analyses that aren't on any pre-built dashboard (cap-hit frequency, engine SKU identification, CG concentration)
-- Removes the dependency on which SAM uses which dashboard
+- Removes the dependency on which CM Champion uses which dashboard
 - Unlocks portfolio-outreach storyboard at proper scale (current MBR analysis is monthly; with BigQuery the agent can rank suppliers weekly)
 
 ### Risk surface (be honest)
 
 - Query costs scale with how often the team builds decks. Cache aggressively.
 - Read-only credentials, scoped to the EU WSP dataset only. No write access. No PII columns.
-- Service account credentials live in `~/.claude/secrets/` on the SAM's local machine — never committed.
+- Service account credentials live in `~/.claude/secrets/` on the CM Champion's local machine — never committed.
 
 ---
 
@@ -157,8 +157,8 @@ The skill queries the standard EU WSP dataset for SuID 37802, April 2026 + 12-mo
 | Source | Why not |
 |---|---|
 | **The supplier's own systems** | We don't have access. Not the integration's job. |
-| **Email / Slack** | Out of scope. The deck is the artefact; sending it is the SAM's job. |
-| **Salesforce / SRM CRM** | Different ownership. SAM tools should stay agnostic. |
+| **Email / Slack** | Out of scope. The deck is the artefact; sending it is the CM Champion's job. |
+| **Salesforce / SRM CRM** | Different ownership. CM Champion tools should stay agnostic. |
 | **Anthropic's API directly** | The skill runs via Claude Code. No bespoke API calls. |
 
 ---
@@ -178,15 +178,15 @@ Don't try to do both at once. Pick one.
 
 Send IT this paragraph:
 
-> *"Pilot scope: 3-4 EU SAMs using a Claude Code skill that reads Wayfair WSP performance data from the team's existing Looker Studio dashboards. Needed: a service account with read-only access to the WSP EU dashboards, scoped to the SAM team's standard dashboard set. Credentials stored locally on each SAM's machine (~/.claude/secrets/), never committed. No write access. 2-week pilot, then evaluate widening to BigQuery direct."*
+> *"Pilot scope: 3-4 EU CM Champions using a Claude Code skill that reads Wayfair WSP performance data from the team's existing Looker Studio dashboards. Needed: a service account with read-only access to the WSP EU dashboards, scoped to the CM Champion team's standard dashboard set. Credentials stored locally on each CM Champion's machine (~/.claude/secrets/), never committed. No write access. 2-week pilot, then evaluate widening to BigQuery direct."*
 
-Their first question will be about data residency and PII. The answer: WSP performance data is supplier-level aggregates (no individual user data), already viewable by the SAM team, and the integration is a local-machine fetch — no Anthropic-side persistence beyond the active prompt.
+Their first question will be about data residency and PII. The answer: WSP performance data is supplier-level aggregates (no individual user data), already viewable by the CM Champion team, and the integration is a local-machine fetch — no Anthropic-side persistence beyond the active prompt.
 
 ---
 
 ## What's the minimum needed to demo the integration
 
-A static `looker_studio.py` mock that returns a hard-coded DataFrame for one supplier. The SAM types the prompt, the skill "queries Looker," and produces the same Monty deck — but without manually dropping a CSV.
+A static `looker_studio.py` mock that returns a hard-coded DataFrame for one supplier. The CM Champion types the prompt, the skill "queries Looker," and produces the same Monty deck — but without manually dropping a CSV.
 
 That mock is 30 lines of Python. I can write it before I go on leave if Brian / Clement greenlight the pilot. Otherwise it's day-1 work when I'm back.
 
@@ -197,6 +197,6 @@ That mock is 30 lines of Python. I can write it before I go on leave if Brian / 
 - **Today:** manual CSV/xlsx → skill works end-to-end. Ship this.
 - **Pilot week 1:** Looker Studio API integration — analyst types dashboard ID, skill pulls data.
 - **Pilot week 2:** BigQuery direct query for advanced analyses (cap-hit, engine SKU, portfolio ranking).
-- **Post-pilot:** decide whether to upgrade everyone to BigQuery or keep Looker Studio as the default for self-service SAMs.
+- **Post-pilot:** decide whether to upgrade everyone to BigQuery or keep Looker Studio as the default for self-service CM Champions.
 
 The basic version doesn't need any integration to be valuable. The integrations are the second derivative.

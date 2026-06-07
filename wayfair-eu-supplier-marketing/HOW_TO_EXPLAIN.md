@@ -6,7 +6,7 @@ Use the right framing for the right room. Same artefact, different angle.
 
 ## The 30-second explainer (Slack DM, walking-to-coffee length)
 
-> *"I codified our WSP pitch playbook into a Claude Code skill. Same visual register as my TuttiBambini deck. A SAM picks a storyboard, answers four questions, and the skill builds the deck. Same playbook, every time. Want a 90-second video?"*
+> *"I codified our WSP pitch playbook into a Claude Code skill. Same visual register as my TuttiBambini deck. A CM Champion picks a storyboard, answers four questions, and the skill builds the deck. Same playbook, every time. Want a 90-second video?"*
 
 That's it. Don't say more. The video does the rest of the work.
 
@@ -14,7 +14,7 @@ That's it. Don't say more. The video does the rest of the work.
 
 ## The 2-minute explainer (1:1 conversation length)
 
-> *"Here's the problem we have: every SAM builds pitch decks differently. Slide count varies, brand rules drift, GRS occasionally leaks into a supplier-facing deck. Onboarding a new SAM takes weeks of mentoring.*
+> *"Here's the problem we have: every CM Champion builds pitch decks differently. Slide count varies, brand rules drift, GRS occasionally leaks into a supplier-facing deck. Onboarding a new CM Champion takes weeks of mentoring.*
 >
 > *I built a Claude Code skill that encodes our playbook. Two things make it work:*
 >
@@ -24,7 +24,7 @@ That's it. Don't say more. The video does the rest of the work.
 >
 > *Result: half-day pitch builds compress to minutes. Brand rules are un-skippable. The output is indistinguishable from the deck I built by hand.*
 >
-> *Asking for a 2-week pilot with 3-4 SAMs when I'm back from leave. The basic version ships this week."*
+> *Asking for a 2-week pilot with 3-4 CM Champions when I'm back from leave. The basic version ships this week."*
 
 ---
 
@@ -32,7 +32,7 @@ That's it. Don't say more. The video does the rest of the work.
 
 Use the 90-second video as the opener. Then walk through:
 
-1. **The problem** (2 min) — show the WSP MBR slide 8 (your team's drag list). "These are 12 suppliers we should pitch this month. At current pace, that's 5-6 days of deck-building. Quality varies. New SAMs need someone to review their decks before they go out."
+1. **The problem** (2 min) — show the WSP MBR slide 8 (your team's drag list). "These are 12 suppliers we should pitch this month. At current pace, that's 5-6 days of deck-building. Quality varies. New CM Champions need someone to review their decks before they go out."
 
 2. **The TuttiBambini baseline** (2 min) — open your Tapanshi deck. "This is what good looks like. Conversational titles. Serif italic heroes. Lavender + gold. Italic takeaway sentences. Calendar visualisation. This is what every supplier deck should look like."
 
@@ -40,7 +40,7 @@ Use the 90-second video as the opener. Then walk through:
 
 4. **Why it doesn't drift** (2 min) — open `storyboards/value-review-variant-b.md`. Read the YAML frontmatter and the per-slide scaffold. "The agent does not pick slide count. Does not pick layout. Does not pick title. It picks from a list of pre-written title sentences. The structure is fixed."
 
-5. **The ask** (1 min) — pilot with 3-4 SAMs for 2 weeks when I'm back. Honest about what's not built yet (some layout render functions, real Looker integration, Variant D Custom). Pilot's job is to harden it.
+5. **The ask** (1 min) — pilot with 3-4 CM Champions for 2 weeks when I'm back. Honest about what's not built yet (some layout render functions, real Looker integration, Variant D Custom). Pilot's job is to harden it.
 
 ---
 
@@ -62,10 +62,10 @@ Use the 90-second video as the opener. Then walk through:
 | **"What if the data is wrong?"** | "The data-prep subagent runs a sanity check against Account Overview before any deck-building starts. Mismatches >5% are surfaced to the analyst." |
 | **"What about the £-rule ask — what if the agent picks the wrong variant?"** | "The closing slide never auto-builds. The skill stops at the mid-deck checkpoint, presents a data summary, recommends a variant, and waits for the analyst to confirm with a single letter." |
 | **"What if it produces something off-brand?"** | "Liberation Serif on Linux, Georgia on Mac. Brand palette hard-coded. Layouts named and fixed. Run the QA loop on every build — if a layout breaks, we see it before the supplier does." |
-| **"Won't this make SAMs lazy?"** | "It removes 90% of the mechanical work — pulling data, formatting slides, writing the same takeaway sentences. SAMs spend their time on the actual judgement: the pitch, the pillar selection, the relationship with the SRM." |
+| **"Won't this make CM Champions lazy?"** | "It removes 90% of the mechanical work — pulling data, formatting slides, writing the same takeaway sentences. CM Champions spend their time on the actual judgement: the pitch, the pillar selection, the relationship with the SRM." |
 | **"Why Claude Code, not [other AI tool]?"** | "Skills are Anthropic's Agent Skills convention. Same format as the marketing-skills bundle. Versioned, reviewable, install via one command. Hard to copy this with a wrapper around a generic LLM." |
 | **"What's the risk surface?"** | "The plugin reads local CSVs. Nothing leaves your laptop unless you explicitly upload. No supplier data goes to Anthropic beyond the prompt itself — and you control what's in the prompt." |
-| **"Why a pilot before rollout?"** | "Two suppliers tested (Monty + Forte). Variant D Custom not battle-tested. LibreOffice QA loop is env-dependent. We harden it with 3-4 SAMs over 2 weeks, then roll out." |
+| **"Why a pilot before rollout?"** | "Two suppliers tested (Monty + Forte). Variant D Custom not battle-tested. LibreOffice QA loop is env-dependent. We harden it with 3-4 CM Champions over 2 weeks, then roll out." |
 
 ---
 
@@ -79,7 +79,7 @@ Use the 90-second video as the opener. Then walk through:
 | "Mid-deck checkpoint" | "Human in the loop" |
 | "TuttiBambini baseline" | "Generic style" |
 | "QA loop" | "Hope it works" |
-| "Pilot with 3-4 SAMs" | "Roll it out everywhere" |
+| "Pilot with 3-4 CM Champions" | "Roll it out everywhere" |
 | "Same visual register" | "AI tries to look like" |
 | "Hard rules un-skippable" | "AI usually follows rules" |
 
@@ -93,7 +93,7 @@ Send them three files:
 2. **`Demo_Storyboard_90s.pdf`** or the 90-second video — the demo.
 3. **The TuttiBambini deck itself** — the gold standard the skill reproduces.
 
-Don't send the SKILL.md, the storyboards, or the subagents to a non-technical audience. Those are for the SAM team and IT to read during the pilot.
+Don't send the SKILL.md, the storyboards, or the subagents to a non-technical audience. Those are for the CM Champion team and IT to read during the pilot.
 
 ---
 
