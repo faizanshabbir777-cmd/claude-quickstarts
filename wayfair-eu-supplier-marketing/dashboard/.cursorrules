@@ -1,0 +1,202 @@
+# Cursor rules — WSP Pitch Builder
+
+When working in this folder, you are operating under the
+`wayfair-supplier-pitching` skill playbook. Read these rules before any
+edit. Apply them to every output.
+
+## Editor compatibility
+
+These rules work in:
+- Cursor (Composer · any model)
+- GitHub Copilot (any IDE)
+- Windsurf
+- Continue (VS Code · JetBrains)
+- Codeium
+- Any editor that respects `.cursorrules`, `.copilot-instructions.md`, or
+  similar context-priming files
+
+You do not need a Claude license. You do not need an Anthropic API key.
+The Python pipeline in this folder runs without any AI at all.
+
+## The 10 hard rules — non-negotiable
+
+1. **WSC, never GRS** in supplier-facing material. WSC = supplier
+   revenue. GRS = Wayfair retail revenue, internal only.
+2. **GBP only** for UK suppliers. £, never $. 1:1 from USD.
+3. **pt, never bps** for share shifts. "−3.7pt" not "−370 bps".
+4. **No blame language.** Never "you under-spent". Frame as "the data
+   confirmed what the pre-event analysis predicted".
+5. **Reframe ROAS compression at scale** as a natural consequence of
+   increased spend, not a performance problem.
+6. **Plain English on every analytical slide.** Translate every raw
+   metric: "wholesale per £1 of WSP" not "WS ROAS".
+7. **WSP-attributed WSC = `wsp_spend × ws_roas`.** Don't carry attributed
+   revenue from source fields without spot-checking.
+8. **Always ask for exact dates** before any promo analysis.
+9. **Two-stage build with a mid-deck checkpoint.** Never auto-build the
+   closing slide.
+10. **QA loop before delivery.** Validate slide rendering before
+    declaring done.
+
+## The role you're playing right now
+
+When extending code in this folder, you are playing one of three roles
+from the multi-agent spec (see `../agents/*.md`):
+
+- **`wsp-data-prep`** — extending `data_prep.py` to parse new file
+  formats or compute new metrics. Output: structured dict.
+- **`wsp-deck-author`** — extending storyboard scaffolds or adding new
+  variants in `deck_builder.py`. Output: render functions.
+- **`wsp-deck-renderer`** — extending the pptx-write path, the QA
+  helpers, or the layout-name → render-function mapping in
+  `deck_builder.build_deck()`.
+
+Declare which role you're playing at the start of your response.
+
+## Visual register — TuttiBambini convention
+
+When adding new slide renderers, mirror the TuttiBambini visual register:
+
+- Liberation Serif Bold Italic for hero numbers and titles
+- Liberation Sans for body and labels
+- Lavender (`#F6EBFB`) cards with GOLD (`#D4A017`) top stripes
+- DEEP purple (`#3C1A50`) for KPI bands + The Ask card
+- GREEN delta pills (`#0E8F60`) for positive movement
+- CORAL (`#B83A3A`) for problem framing
+- Numbered eyebrows (`"01 · WHAT WSP IS DOING FOR YOU"`)
+- Conversational sentence titles ending with periods
+- Italic Georgia takeaway sentence at the bottom of every analytical
+  slide
+
+Use the existing renderers in `deck_builder.py` as templates. Don't
+invent a new visual register.
+
+## Storyboard-driven structure
+
+When adding a new pitch type:
+
+1. Read the storyboard spec in `../storyboards/{name}.md` first
+2. The storyboard dictates slide count, eyebrow numbering, layout per
+   slide, title patterns. **Do not invent these.**
+3. The agent fills the scaffold. The agent does not pick the structure.
+
+## Composition
+
+This skill composes with two upstream skills (see
+`../SKILL_INTEGRATION.md`):
+
+- **`anthropic/pptx`** — owns PPTX file I/O, the QA loop convention,
+  "every slide needs a visual element" design principles. Use
+  `python-pptx` for file I/O. Use `markitdown` for text extraction.
+- **`pptx-from-layouts`** — owns the `[HINT: layout_name]` marker
+  pattern for the author→renderer handoff.
+
+Don't re-implement what these skills already own.
+
+## Editing patterns
+
+### Adding a new render function
+
+```python
+def render_my_new_slide(data: dict) -> Image.Image:
+    """One-sentence description of what this slide shows."""
+    img = Image.new("RGB", (W, H), WHITE_T)
+    d = ImageDraw.Draw(img)
+    # Numbered eyebrow (small caps purple, letter-spaced)
+    draw_ls(d, M, 90, "0X · YOUR SLIDE EYEBROW",
+            sans(22, bold=True), PURPLE_T, sp=3)
+    # Conversational title (Serif Bold, ends in period)
+    d.text((M, 165),
+           data.get('my_title', "Default conversational sentence."),
+           font=serif(48, bold=True), fill=INK_T)
+    # ... slide body using the brand palette ...
+    # Italic takeaway at bottom
+    d.text((M, H - 80),
+           data.get('my_takeaway',
+               "Take-away: one plain-English sentence."),
+           font=serif(28, italic=True), fill=INK_T)
+    return img
+```
+
+### Adding a new build function
+
+```python
+def build_deck_my_new_variant(data: dict) -> bytes:
+    """Build the new variant. Mirror the existing build_deck_* shape."""
+    import tempfile
+    slides = [
+        render_cover(data),
+        render_value_story(data),
+        # ... your new slides in order ...
+        render_ask(data),
+    ]
+    from pptx import Presentation
+    from pptx.util import Inches
+    prs = Presentation()
+    prs.slide_width = Inches(13.333); prs.slide_height = Inches(7.5)
+    BLANK = prs.slide_layouts[6]
+    with tempfile.TemporaryDirectory() as td:
+        for i, slide_img in enumerate(slides):
+            if slide_img.mode != "RGB":
+                slide_img = slide_img.convert("RGB")
+            png_path = f"{td}/slide_{i}.png"
+            slide_img.save(png_path, "PNG", optimize=False)
+            s = prs.slides.add_slide(BLANK)
+            s.shapes.add_picture(png_path, 0, 0,
+                                  width=prs.slide_width,
+                                  height=prs.slide_height)
+        out = io.BytesIO(); prs.save(out); out.seek(0)
+        return out.read()
+```
+
+Register it in `build_deck()` dispatcher.
+
+### Adding a new data parser
+
+Follow the `parse_uploaded_file()` pattern in `data_prep.py`:
+
+1. Read file (`pd.read_csv` or `pd.read_excel`)
+2. Match columns via `find_col(df, key)` using `COLUMN_ALIASES`
+3. Clean with `clean_money()` if needed
+4. Compute metrics
+5. Return a structured dict matching the storyboard's `required_data:`
+
+## Always before declaring done
+
+1. The new code parses (`python3 -c "import deck_builder"`)
+2. The new builder produces a valid pptx (`python-pptx` opens it)
+3. The slide count matches the storyboard spec
+4. The audit log entry includes the new storyboard name
+5. The app.py dropdown lists it as ✅ if v1.0, ⏳ if not-yet-shipped
+
+## What you SHOULD ask the user
+
+- The exact column names they have in their source file (so we can add
+  to `COLUMN_ALIASES`)
+- The actual £ amount or pillar text for any new title that wasn't in
+  `TITLE_EXAMPLES`
+- Confirmation if the data sanity check fails by more than 5%
+
+## What you should NOT ask
+
+- "Should I use python-pptx or pptxgenjs?" → python-pptx, always
+- "What colour?" → check the palette constants at top of `deck_builder.py`
+- "Should I add a Claude API call?" → no
+- "Can I invent a new slide layout?" → no, mirror an existing one
+- "Should I add bullets?" → no, every slide needs a visual element
+  (anthropic/pptx convention)
+
+## Pointers
+
+- Operator's manual: `../HOW_TO_USE.md`
+- Data safety: `DATA_SAFETY.md`
+- Deployment: `DEPLOY.md`
+- Brian's runbook (during the maintainer's leave): `BRIAN_RUNBOOK.md`
+- Multi-agent demo (this folder's context): `../MULTI_AGENT_DEMO.md`
+- Roadmap (next v1.1 work): `../ROADMAP.md`
+- Skill composition matrix: `../SKILL_INTEGRATION.md`
+
+## One-line summary
+
+> *Read the storyboard. Don't invent the structure. Follow the
+> TuttiBambini visual register. Run the smoke test. Update the dispatch.*

@@ -1,0 +1,13 @@
+{
+  "name": "wayfair-eu-supplier-marketing",
+  "description": "Wayfair EU Supplier Marketing analyst plugin — Wayfair Sponsored Products (WSP) analysis, supplier-facing pitch decks, MBR data handling, promo recaps (Way Day, BFCM, etc.), Castlegate/RTV reframe, 5%-of-WSC budget framework. Bundles two skills (foundation + promo) and the /wsp slash command.",
+  "version": "0.5.2",
+  "author": {
+    "name": "Wayfair EU Supplier Marketing"
+  },
+  "homepage": "https://github.com/faizanshabbir777-cmd/claude-quickstarts/tree/main/wayfair-eu-supplier-marketing",
+  "repository": "https://github.com/faizanshabbir777-cmd/claude-quickstarts",
+  "license": "MIT",
+  "skills": "./skills",
+  "commands": "./commands"
+}
