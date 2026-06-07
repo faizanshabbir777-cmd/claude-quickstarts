@@ -748,3 +748,430 @@ def build_deck(storyboard: str, data: dict) -> bytes:
             f"Other storyboards (promo-recap, summit, MBR) ship in v1.1."
         )
     return builders[key](data)
+
+
+# =====================================================================
+# DEEP-DIVE ANALYSIS SLIDES — SKU exposure split, CVR per bucket,
+# sort rank movement, engine SKU spotlight. Added to the Value Review
+# storyboard when the analyst wants the "full picture" treatment.
+# =====================================================================
+
+def render_sku_exposure_split(data: dict) -> Image.Image:
+    """SKU buckets by ads exposure with WSC contribution per bucket.
+
+    Tells the "your wholesale lives on a small set of SKUs" story —
+    every supplier sees 7-10% of catalogue driving 75-85% of wholesale.
+    """
+    img = Image.new("RGB", (W, H), WHITE_T)
+    d = ImageDraw.Draw(img)
+
+    draw_ls(d, M, 90, "04  ·  WHERE YOUR WHOLESALE LIVES",
+            sans(22, bold=True), PURPLE_T, sp=3)
+    d.text((M, 165),
+           data.get('exposure_title',
+               "A small share of your SKUs carries most of your wholesale."),
+           font=serif(48, bold=True), fill=INK_T)
+
+    buckets = data.get('sku_exposure_buckets', [
+        {'label': 'NO WSP', 'sku_pct': 78, 'wsc_pct': 14, 'color': GREY_BAR},
+        {'label': 'LIGHT',  'sku_pct': 12, 'wsc_pct': 16, 'color': LAV_T},
+        {'label': 'MODERATE','sku_pct': 7, 'wsc_pct': 28, 'color': (180, 130, 200)},
+        {'label': 'HEAVY',  'sku_pct': 3,  'wsc_pct': 42, 'color': PURPLE_T},
+    ])
+
+    # Visual: two stacked horizontal bars — SKUs (top) vs WSC (bottom)
+    # to make the disproportion visually obvious
+    bar_left = M
+    bar_right = W - M
+    bar_w = bar_right - bar_left
+
+    # Top bar — % of SKUs
+    bar1_y = 380
+    bar1_h = 100
+    draw_ls(d, M, bar1_y - 35, "SHARE OF YOUR CATALOGUE",
+            sans(18, bold=True), SLATE_T, sp=2)
+    cx = bar_left
+    for bucket in buckets:
+        w = int(bar_w * bucket['sku_pct'] / 100)
+        d.rectangle([cx, bar1_y, cx + w, bar1_y + bar1_h], fill=bucket['color'])
+        # Label inside bar if there's room
+        if w > 120:
+            label_color = WHITE_T if bucket['color'] == PURPLE_T else INK_T
+            d.text((cx + 18, bar1_y + 18), bucket['label'],
+                   font=sans(18, bold=True), fill=label_color)
+            d.text((cx + 18, bar1_y + 45), f"{bucket['sku_pct']}%",
+                   font=serif(40, bold=True, italic=True), fill=label_color)
+        cx += w
+
+    # Bottom bar — % of WSC
+    bar2_y = 600
+    bar2_h = 100
+    draw_ls(d, M, bar2_y - 35, "SHARE OF YOUR WHOLESALE",
+            sans(18, bold=True), SLATE_T, sp=2)
+    cx = bar_left
+    for bucket in buckets:
+        w = int(bar_w * bucket['wsc_pct'] / 100)
+        d.rectangle([cx, bar2_y, cx + w, bar2_y + bar2_h], fill=bucket['color'])
+        if w > 120:
+            label_color = WHITE_T if bucket['color'] == PURPLE_T else INK_T
+            d.text((cx + 18, bar2_y + 18), bucket['label'],
+                   font=sans(18, bold=True), fill=label_color)
+            d.text((cx + 18, bar2_y + 45), f"{bucket['wsc_pct']}%",
+                   font=serif(40, bold=True, italic=True), fill=label_color)
+        cx += w
+
+    # Connecting visual emphasis between top "HEAVY" and bottom "HEAVY"
+    heavy = buckets[-1]
+    sku_start = bar_left + int(bar_w * (100 - heavy['sku_pct']) / 100)
+    wsc_start = bar_left + int(bar_w * (100 - heavy['wsc_pct']) / 100)
+    # Diagonal stripes connecting (visual: top-right wedge of SKUs blossoms into
+    # much wider chunk of WSC below)
+    for offset in range(3):
+        d.line([(sku_start + offset, bar1_y + bar1_h),
+                (wsc_start + offset, bar2_y)], fill=PURPLE_T, width=2)
+
+    # Lavender callout at bottom
+    cb_y = 870
+    cb_h = 220
+    d.rectangle([M, cb_y, W - M, cb_y + cb_h], fill=LAV_T)
+    heavy_sku = heavy['sku_pct']
+    heavy_wsc = heavy['wsc_pct']
+    multiplier = round(heavy_wsc / heavy_sku, 1) if heavy_sku > 0 else 0
+    d.text((M + 40, cb_y + 30), "THE LIFT MULTIPLE",
+           font=sans(20, bold=True), fill=PURPLE_T)
+    d.text((M + 40, cb_y + 70), f"{multiplier}×",
+           font=serif(110, bold=True, italic=True), fill=DEEP_T)
+    d.text((M + 280, cb_y + 100),
+           f"Your heavily-exposed SKUs are {heavy['sku_pct']}% of catalogue",
+           font=sans(26), fill=INK_T)
+    d.text((M + 280, cb_y + 135),
+           f"and drive {heavy['wsc_pct']}% of wholesale — {multiplier}× their fair share.",
+           font=sans(26), fill=INK_T)
+    d.text((M + 280, cb_y + 175),
+           "This is the bucket WSP keeps in front of the shopper.",
+           font=serif(24, italic=True), fill=PURPLE_T)
+
+    # Takeaway
+    d.text((M, H - 80),
+           data.get('exposure_takeaway',
+               "Take-away: your wholesale concentrates on the SKUs WSP keeps in front of ready-to-buy shoppers."),
+           font=serif(28, italic=True), fill=INK_T)
+    return img
+
+
+def render_cvr_by_exposure(data: dict) -> Image.Image:
+    """Conversion rate by ads-exposure bucket. The proof that exposure → conversion."""
+    img = Image.new("RGB", (W, H), WHITE_T)
+    d = ImageDraw.Draw(img)
+
+    draw_ls(d, M, 90, "05  ·  WSP RAISES CONVERSION",
+            sans(22, bold=True), PURPLE_T, sp=3)
+    d.text((M, 165),
+           data.get('cvr_title',
+               "The more you advertise a SKU, the more readily it converts."),
+           font=serif(48, bold=True), fill=INK_T)
+
+    # 4 KPI-style cards — one per exposure bucket — with CVR as the hero
+    buckets = data.get('cvr_buckets', [
+        {'label': 'NO WSP',   'cvr': 0.4,  'sub': 'baseline organic traffic'},
+        {'label': 'LIGHT',    'cvr': 0.7,  'sub': '~2× baseline'},
+        {'label': 'MODERATE', 'cvr': 1.3,  'sub': '~3× baseline'},
+        {'label': 'HEAVY',    'cvr': 2.6,  'sub': '~6× baseline'},
+    ])
+
+    card_y = 380
+    card_h = 350
+    card_w = (W - 2*M - 3*30) // 4
+    card_gap = 30
+    # Use a gradient: greyer for no-WSP, more purple for heavy
+    stripe_colors = [GREY_BAR, LAV_DARK := (216, 188, 224), (175, 130, 195), PURPLE_T]
+    for i, bucket in enumerate(buckets[:4]):
+        cx = M + i * (card_w + card_gap)
+        d.rectangle([cx, card_y, cx + card_w, card_y + card_h], fill=LAV_T)
+        d.rectangle([cx, card_y, cx + card_w, card_y + 10],
+                    fill=stripe_colors[i] if i < len(stripe_colors) else PURPLE_T)
+        draw_ls(d, cx + 35, card_y + 40, bucket['label'],
+                sans(22, bold=True), PURPLE_T, sp=2)
+        d.text((cx + 35, card_y + 110), f"{bucket['cvr']:.1f}%",
+               font=serif(95, bold=True, italic=True), fill=DEEP_T)
+        d.text((cx + 35, card_y + 230),
+               "conversion rate",
+               font=sans(22), fill=SLATE_T)
+        d.text((cx + 35, card_y + 270), bucket['sub'],
+               font=sans(20, italic=True), fill=INK_T)
+
+    # Lavender body callout
+    cb_y = 790
+    cb_h = 220
+    d.rectangle([M, cb_y, W - M, cb_y + cb_h], fill=LAV_T)
+    d.text((M + 40, cb_y + 30), "WHY THIS HAPPENS",
+           font=sans(20, bold=True), fill=PURPLE_T)
+    d.text((M + 40, cb_y + 75),
+           "WSP places your SKUs in front of shoppers who are already looking to buy.",
+           font=sans(26), fill=INK_T)
+    d.text((M + 40, cb_y + 115),
+           "The higher the placement, the better-matched the click, the more likely the purchase.",
+           font=sans(26), fill=INK_T)
+    d.text((M + 40, cb_y + 165),
+           "Wayfair's sort algorithm rewards sales velocity, so the lift compounds week-over-week.",
+           font=serif(26, italic=True), fill=PURPLE_T)
+
+    d.text((M, H - 80),
+           data.get('cvr_takeaway',
+               "Take-away: WSP doesn't just buy you traffic — it buys you the right traffic at the moment it converts."),
+           font=serif(28, italic=True), fill=INK_T)
+    return img
+
+
+def render_sort_rank_improvement(data: dict) -> Image.Image:
+    """Sort-rank position improvement over the period for WSP-exposed SKUs."""
+    img = Image.new("RGB", (W, H), WHITE_T)
+    d = ImageDraw.Draw(img)
+
+    draw_ls(d, M, 90, "06  ·  WSP LIFTS YOUR ORGANIC RANK",
+            sans(22, bold=True), PURPLE_T, sp=3)
+    d.text((M, 165),
+           data.get('rank_title',
+               "Pages 1-3 hold 80% of shoppers. WSP buys you a seat at that table — then keeps it."),
+           font=serif(42, bold=True), fill=INK_T)
+
+    # LEFT card — distribution of clicks across browse pages
+    left_x = M; left_w = 1050; left_y = 380; left_h = 700
+    d.rectangle([left_x, left_y, left_x + left_w, left_y + left_h], fill=LAV_T)
+    draw_ls(d, left_x + 40, left_y + 40, "WHY PAGE RANK MATTERS",
+            sans(20, bold=True), PURPLE_T, sp=2)
+
+    # Page distribution chart
+    pages = data.get('page_distribution', [
+        ('Page 1', 62.5),
+        ('Page 2', 16.6),
+        ('Page 3', 6.1),
+        ('Page 4', 3.7),
+        ('Page 5', 2.3),
+        ('Page 6+', 8.8),
+    ])
+    chart_top = left_y + 130
+    chart_bot = left_y + 550
+    chart_h = chart_bot - chart_top
+    chart_w = left_w - 100
+    chart_x_offset = left_x + 50
+    n = len(pages)
+    bw = (chart_w - 40 * (n-1)) // n
+    max_v = max(v for _, v in pages) * 1.15
+    for i, (label, val) in enumerate(pages):
+        bx = chart_x_offset + i * (bw + 40)
+        bh = int(val / max_v * chart_h)
+        by = chart_bot - bh
+        # First 3 pages = "the WSP zone" coloured PURPLE
+        color = PURPLE_T if i < 3 else GREY_BAR
+        d.rectangle([bx, by, bx + bw, chart_bot], fill=color)
+        # value label
+        d.text((bx, by - 30), f"{val:.1f}%",
+               font=sans(20, bold=True), fill=INK_T)
+        # page label
+        d.text((bx, chart_bot + 14), label,
+               font=sans(18), fill=SLATE_T)
+
+    d.text((left_x + 40, left_y + left_h - 100),
+           "Pages 1-3 hold ~85% of shoppers.",
+           font=serif(28, italic=True), fill=DEEP_T)
+    d.text((left_x + 40, left_y + left_h - 60),
+           "Anything past page 3 might as well be invisible.",
+           font=sans(22), fill=INK_T)
+
+    # RIGHT card — sort rank movement before/after
+    rx = left_x + left_w + 50
+    rw = W - rx - M
+    d.rectangle([rx, left_y, rx + rw, left_y + left_h], fill=DEEP_T)
+    draw_ls(d, rx + 40, left_y + 40, "YOUR SORT-RANK MOVE",
+            sans(20, bold=True), GOLD_T, sp=2)
+
+    rank_before = data.get('rank_before', 18)
+    rank_after  = data.get('rank_after', 7)
+    improvement_pct = int((rank_before - rank_after) / rank_before * 100) if rank_before > 0 else 0
+
+    d.text((rx + 40, left_y + 100), "BEFORE WSP",
+           font=sans(18, bold=True), fill=(220, 195, 220))
+    d.text((rx + 40, left_y + 135), f"Position #{rank_before}",
+           font=serif(72, bold=True, italic=True), fill=WHITE_T)
+    d.text((rx + 40, left_y + 230), "(average across engine SKUs)",
+           font=sans(20, italic=True), fill=(180, 165, 200))
+
+    # Arrow down
+    arrow_x = rx + 40
+    arrow_y = left_y + 290
+    d.line([(arrow_x, arrow_y), (arrow_x, arrow_y + 50)], fill=GOLD_T, width=4)
+    d.polygon([(arrow_x - 15, arrow_y + 50),
+               (arrow_x + 15, arrow_y + 50),
+               (arrow_x, arrow_y + 70)], fill=GOLD_T)
+
+    d.text((rx + 40, left_y + 380), "WITH WSP",
+           font=sans(18, bold=True), fill=GOLD_T)
+    d.text((rx + 40, left_y + 415), f"Position #{rank_after}",
+           font=serif(72, bold=True, italic=True), fill=GOLD_T)
+    d.text((rx + 40, left_y + 510),
+           f"−{improvement_pct}% lower number",
+           font=sans(22, bold=True), fill=WHITE_T)
+    d.text((rx + 40, left_y + 545),
+           "= higher position",
+           font=sans(22, italic=True), fill=(220, 195, 220))
+
+    d.text((M, H - 80),
+           data.get('rank_takeaway',
+               "Take-away: WSP doesn't just sell THIS month — it earns your SKUs sort rank that pays out for months after."),
+           font=serif(28, italic=True), fill=INK_T)
+    return img
+
+
+def render_engine_sku_spotlight(data: dict) -> Image.Image:
+    """Top-5 engine SKUs with their CG status, OTD, CVR, units sold.
+
+    This is §A.2.4 from SKILL.md — "rank SKUs by WSC contribution, take top 5."
+    """
+    img = Image.new("RGB", (W, H), WHITE_T)
+    d = ImageDraw.Draw(img)
+
+    draw_ls(d, M, 90, "07  ·  THE FIVE SKUs DOING THE WORK",
+            sans(22, bold=True), PURPLE_T, sp=3)
+    d.text((M, 165),
+           data.get('spotlight_title',
+               "These five products are the engine. WSP keeps them ahead of the competition."),
+           font=serif(48, bold=True), fill=INK_T)
+
+    skus = data.get('engine_skus', [
+        {'name': 'Engine SKU 1', 'cg_status': 'High-Velocity CG', 'otd': 2, 'cvr': 3.4, 'units': 412, 'wsc_share': 8.2},
+        {'name': 'Engine SKU 2', 'cg_status': 'High-Velocity CG', 'otd': 3, 'cvr': 2.9, 'units': 348, 'wsc_share': 6.8},
+        {'name': 'Engine SKU 3', 'cg_status': 'High-Velocity CG', 'otd': 2, 'cvr': 3.1, 'units': 296, 'wsc_share': 5.9},
+        {'name': 'Engine SKU 4', 'cg_status': 'Strategic CG',     'otd': 5, 'cvr': 2.4, 'units': 218, 'wsc_share': 4.4},
+        {'name': 'Engine SKU 5', 'cg_status': 'High-Velocity CG', 'otd': 4, 'cvr': 2.7, 'units': 195, 'wsc_share': 3.8},
+    ])
+    total_share = sum(s['wsc_share'] for s in skus[:5])
+
+    # Header summary
+    sum_y = 290
+    sum_h = 90
+    d.rectangle([M, sum_y, W - M, sum_y + sum_h], fill=LAV_T)
+    d.text((M + 30, sum_y + 24), f"{total_share:.0f}%",
+           font=serif(48, bold=True, italic=True), fill=DEEP_T)
+    d.text((M + 180, sum_y + 30),
+           f"of your wholesale in {data.get('period', 'this period')} came from these five SKUs.",
+           font=sans(24), fill=INK_T)
+    d.text((M + 180, sum_y + 60),
+           "All but one are in Castlegate — that is why the conversion holds.",
+           font=serif(20, italic=True), fill=PURPLE_T)
+
+    # Table
+    table_y = 430
+    row_h = 100
+    col_widths = [800, 350, 200, 200, 240, 240]  # name, CG, OTD, CVR, units, % WSC
+    col_x = [M]
+    for w in col_widths[:-1]:
+        col_x.append(col_x[-1] + w)
+    headers = ['SKU', 'CG STATUS', 'OTD (days)', 'CVR', 'UNITS SOLD', '% YOUR WSC']
+
+    # Header row
+    d.rectangle([M, table_y, W - M, table_y + 50], fill=DEEP_T)
+    for i, h in enumerate(headers):
+        d.text((col_x[i] + 16, table_y + 14),
+               h, font=sans(16, bold=True), fill=GOLD_T)
+
+    # Body rows
+    for r, sku in enumerate(skus[:5]):
+        ry = table_y + 50 + r * row_h
+        # Alternate row shade
+        if r % 2 == 0:
+            d.rectangle([M, ry, W - M, ry + row_h], fill=(248, 244, 248))
+        # SKU name (serif italic for emphasis)
+        d.text((col_x[0] + 16, ry + 25), sku['name'],
+               font=serif(28, bold=True, italic=True), fill=DEEP_T)
+        d.text((col_x[0] + 16, ry + 65), data.get('period', ''),
+               font=sans(16, italic=True), fill=SLATE_T)
+        # CG status — coloured chip
+        cg_color = GREEN_T if 'High-Velocity' in sku['cg_status'] else GOLD_T
+        chip_w = 270
+        d.rounded_rectangle([col_x[1] + 16, ry + 30,
+                             col_x[1] + 16 + chip_w, ry + 65],
+                            radius=6, fill=cg_color)
+        d.text((col_x[1] + 30, ry + 36), sku['cg_status'],
+               font=sans(15, bold=True), fill=WHITE_T)
+        # OTD
+        d.text((col_x[2] + 16, ry + 35), f"{sku['otd']}",
+               font=serif(32, bold=True, italic=True), fill=DEEP_T)
+        # CVR
+        d.text((col_x[3] + 16, ry + 35), f"{sku['cvr']:.1f}%",
+               font=serif(32, bold=True, italic=True), fill=DEEP_T)
+        # Units
+        d.text((col_x[4] + 16, ry + 35), f"{sku['units']:,}",
+               font=serif(32, bold=True, italic=True), fill=DEEP_T)
+        # % WSC
+        d.text((col_x[5] + 16, ry + 35), f"{sku['wsc_share']:.1f}%",
+               font=serif(32, bold=True, italic=True), fill=PURPLE_T)
+
+    d.text((M, H - 80),
+           data.get('spotlight_takeaway',
+               "Take-away: these five SKUs are where WSP earns its keep — and where pausing it costs you the most."),
+           font=serif(28, italic=True), fill=INK_T)
+    return img
+
+
+def build_deck_value_review_deep_dive(data: dict) -> bytes:
+    """Build the deep-dive value review — 8 slides with SKU analysis.
+
+    Order:
+        1 · Cover
+        2 · 01 · WHAT WSP IS DOING        (hero £/£1 + monthly chart)
+        3 · 02 · YoY PROOF                (KPI band + green pills)
+        4 · 03 · SKU EXPOSURE SPLIT       (NEW — where wholesale lives)
+        5 · 04 · CVR BY EXPOSURE BUCKET   (NEW — exposure → conversion)
+        6 · 05 · SORT RANK IMPROVEMENT    (NEW — pages 1-3 + before/after)
+        7 · 06 · ENGINE SKU SPOTLIGHT     (NEW — top 5 table with CG/CVR/OTD)
+        8 · 07 · WHERE WE GO FROM HERE    (3 pillars + The Ask)
+    """
+    import tempfile
+    slides = [
+        render_cover(data),
+        render_value_story(data),
+        render_yoy_proof(data),
+        render_sku_exposure_split(data),
+        render_cvr_by_exposure(data),
+        render_sort_rank_improvement(data),
+        render_engine_sku_spotlight(data),
+        render_ask(data),
+    ]
+    from pptx import Presentation
+    from pptx.util import Inches
+    prs = Presentation()
+    prs.slide_width = Inches(13.333); prs.slide_height = Inches(7.5)
+    BLANK = prs.slide_layouts[6]
+    with tempfile.TemporaryDirectory() as td:
+        for i, slide_img in enumerate(slides):
+            if slide_img.mode != "RGB":
+                slide_img = slide_img.convert("RGB")
+            png_path = f"{td}/slide_{i}.png"
+            slide_img.save(png_path, "PNG", optimize=False)
+            s = prs.slides.add_slide(BLANK)
+            s.shapes.add_picture(png_path, 0, 0,
+                                  width=prs.slide_width,
+                                  height=prs.slide_height)
+        out = io.BytesIO(); prs.save(out); out.seek(0)
+        return out.read()
+
+
+# Update the dispatcher to include the deep-dive variant
+_original_build_deck = build_deck
+
+def build_deck(storyboard: str, data: dict) -> bytes:
+    """Updated dispatcher with the deep-dive variant added."""
+    key = storyboard.replace('.md', '').strip().split()[0]
+    builders = {
+        'value-review-variant-b':         build_deck_value_review_b,
+        'value-review-deep-dive':         build_deck_value_review_deep_dive,
+        'restart-pitch-variant-a':        build_deck_restart_pitch_a,
+        'switch-to-5pct-variant-c':       build_deck_switch_to_5pct_c,
+    }
+    if key not in builders:
+        raise ValueError(
+            f"No builder for storyboard '{key}' yet. Available: {list(builders)}. "
+            f"Other storyboards (promo-recap, summit, MBR) ship in v1.1."
+        )
+    return builders[key](data)
