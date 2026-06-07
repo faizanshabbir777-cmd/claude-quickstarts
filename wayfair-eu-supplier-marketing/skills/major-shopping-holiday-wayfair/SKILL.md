@@ -1,9 +1,15 @@
 ---
 name: major-shopping-holiday-wayfair
-description: "When the user wants a Wayfair Sponsored Products (WSP) promo-event recap deck — Way Day, Black Friday, Cyber Week, BFCM, Boxing Day, January Sale, Easter, Bank Holiday weekends, Summer Sale, Christmas / Year-End Clearance. Also use when the user mentions 'share shift report,' 'promo for [supplier],' 'BFCM recap,' 'Way Day deck,' 'Cyber Week pitch,' 'pre-event email,' 'budget journey,' 'cap-only vs actual spend,' 'mitigation pull-forward,' 'incremental wholesale-per-pound,' or any event-specific recap. Produces a 4-6 slide PowerPoint ending in a recommended-action slide. Always asks for exact promo dates AND matched pre-period dates before any analysis (never infers from filenames or 'the holiday'). Applies all the foundation skill's hard rules (WSC never GRS, GBP, pt not bps, no blame language, plain English, scale-compression reframe). Uses the pre-event email evidence trail and/or mitigation cascade visualization on slide 3 when the supporting artefacts exist."
+description: "When the user wants a Wayfair Sponsored Products (WSP) promo-event recap deck — Way Day, Black Friday, Cyber Week, BFCM, Boxing Day, January Sale, Easter, Bank Holiday weekends, Summer Sale, Christmas / Year-End Clearance. Also use when the user mentions 'share shift report,' 'promo for [supplier],' 'BFCM recap,' 'Way Day deck,' 'Cyber Week pitch,' 'pre-event email,' 'budget journey,' 'cap-only vs actual spend,' 'mitigation pull-forward,' 'incremental wholesale-per-pound,' or any event-specific recap. Produces a 4-6 slide PowerPoint ending in a recommended-action slide. Always asks for exact promo dates AND matched pre-period dates before any analysis (never infers from filenames or 'the holiday'). Applies all the foundation skill's hard rules (WSC never GRS, GBP, pt not bps, no blame language, plain English, scale-compression reframe). Uses the pre-event email evidence trail and/or mitigation cascade visualization on slide 3 when the supporting artefacts exist. Composes with anthropic/pptx (canonical PPTX) and pptx-from-layouts ([HINT: layout_name] pattern) via the wayfair-supplier-pitching foundation skill."
 metadata:
-  version: 1.0.0
+  version: 1.0.1
+  composes_with:
+    - "wayfair-supplier-pitching (sibling foundation skill) — hard rules, visual register, storyboard mechanics"
+    - "anthropic/pptx (https://github.com/anthropics/skills/blob/main/skills/pptx/SKILL.md) — canonical PPTX file I/O + QA loop"
+    - "pptx-from-layouts (https://github.com/tristan-mcinnis/pptx-from-layouts-skill) — [HINT: layout_name] marker pattern"
 ---
+
+> **Skill composition.** This skill is event-specific layered on top of `wayfair-supplier-pitching`. All hard rules, visual conventions, and storyboard mechanics come from the foundation skill. This skill specialises the deck architecture for promo events (Step 0 = exact dates, mid-deck checkpoint = required, 4-6 slide structure). PPTX file I/O is delegated to `anthropic/pptx`. See `SKILL_INTEGRATION.md` at the plugin root for the full skill graph.
 
 # Major Shopping Holiday — Promo Recap Skill
 

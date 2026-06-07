@@ -4,6 +4,15 @@ This directory holds the **base-level storyboards** that every WSP deck builds f
 
 This is what stops the decks from drifting off-script.
 
+## How storyboards compose with upstream skills
+
+Storyboards sit inside the `wayfair-supplier-pitching` skill but actively reference two upstream skills via their `[HINT: layout_name]` markers and visual-element principles:
+
+- **`anthropic/pptx`** — supplies design ideas (don't make boring text-only slides, every slide needs a visual element, pick a bold colour palette and dominate-not-equal weighting). Our storyboards apply this: every slide-scaffold mandates a chart, card, hero number, or visual structure — never bullet-list-only slides.
+- **`pptx-from-layouts`** — supplies the `[HINT: layout_name]` marker convention. Each slide-scaffold in our storyboards declares a `LAYOUT:` field which becomes the `[HINT:]` marker in the author's `slides.md` output, which the renderer maps to its concrete layout function.
+
+See `../SKILL_INTEGRATION.md` for the full decision-ownership matrix.
+
 ## Pattern
 
 Every storyboard is a markdown file with:

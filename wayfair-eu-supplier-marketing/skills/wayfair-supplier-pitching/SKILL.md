@@ -1,9 +1,14 @@
 ---
 name: wayfair-supplier-pitching
-description: "When the user is working as a Wayfair EU Supplier Marketing analyst (SAM) building supplier-facing pitch decks — MBRs, restart pitches, monthly business reviews, multi-month business cases, or portfolio outreach. Also use when the user mentions 'WSP,' 'MWSP,' 'WSC,' 'GRS,' 'WS ROAS,' 'wRoAS,' 'Castlegate,' 'CG penetration,' 'CGF,' 'RTV,' 'engine SKU,' 'cap-hit,' 'wallet,' 'MBR SET 1/2/3,' 'media_tbl_advertising_campaign_reporting_extended,' campaign-type codes 'RE / VE / OE / OU,' '5% of WSC,' 'wholesale-per-pound,' 'Detailed Listing Health,' 'pre-event email,' 'mitigation cascade,' or any request to build a branded Wayfair supplier pitch deck. Enforces the hard rules (WSC never GRS in supplier-facing, GBP only at 1:1 from USD, pt never bps, no blame language, scale-compression reframe) and applies the killer narrative patterns (CG/RTV reframe, pre-event email evidence trail, mitigation cascade). Triggers the two-stage build with mid-deck checkpoint and the QA loop before delivery."
+description: "When the user is working as a Wayfair EU Supplier Marketing analyst (SAM) building supplier-facing pitch decks — MBRs, restart pitches, monthly business reviews, multi-month business cases, or portfolio outreach. Also use when the user mentions 'WSP,' 'MWSP,' 'WSC,' 'GRS,' 'WS ROAS,' 'wRoAS,' 'Castlegate,' 'CG penetration,' 'CGF,' 'RTV,' 'engine SKU,' 'cap-hit,' 'wallet,' 'MBR SET 1/2/3,' 'media_tbl_advertising_campaign_reporting_extended,' campaign-type codes 'RE / VE / OE / OU,' '5% of WSC,' 'wholesale-per-pound,' 'Detailed Listing Health,' 'pre-event email,' 'mitigation cascade,' or any request to build a branded Wayfair supplier pitch deck. Enforces the hard rules (WSC never GRS in supplier-facing, GBP only at 1:1 from USD, pt never bps, no blame language, scale-compression reframe) and applies the killer narrative patterns (CG/RTV reframe, pre-event email evidence trail, mitigation cascade). Triggers the two-stage build with mid-deck checkpoint and the QA loop before delivery. Composes with the canonical anthropic/pptx skill for file I/O and the QA loop convention, and with pptx-from-layouts for the [HINT: layout_name] addressing pattern."
 metadata:
-  version: 1.0.0
+  version: 1.0.1
+  composes_with:
+    - "anthropic/pptx (https://github.com/anthropics/skills/blob/main/skills/pptx/SKILL.md) — canonical PPTX file I/O, QA loop, design principles"
+    - "pptx-from-layouts (https://github.com/tristan-mcinnis/pptx-from-layouts-skill) — [HINT: layout_name] marker pattern"
 ---
+
+> **Skill composition.** This skill owns the *playbook* (rules, storyboards, brand register, hard rules). It does NOT re-implement PPTX file I/O — it delegates that to `anthropic/pptx`. It does NOT re-invent the layout addressing pattern — it delegates that to `pptx-from-layouts`. See `SKILL_INTEGRATION.md` at the plugin root for the full decision-ownership matrix and how the three skills compose.
 
 # Wayfair Supplier Pitching — Foundation Skill
 
