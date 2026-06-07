@@ -183,11 +183,27 @@ with tab_filters:
     with col2:
         st.markdown('<div class="wsp-eyebrow">Brief & Storyboard</div>', unsafe_allow_html=True)
         storyboard = st.selectbox("Storyboard",
-            ["value-review-variant-b  · Continue at pace",
-             "restart-pitch-variant-a  · Switch back on (coming v1.1)",
-             "switch-to-5pct-variant-c  · Fix lumpy spend (coming v1.1)",
+            ["value-review-variant-b  · Continue at pace · ✅ v1.0",
+             "restart-pitch-variant-a  · Switch back on (with dark-days calendar) · ✅ v1.0",
+             "switch-to-5pct-variant-c  · Fix lumpy spend · ✅ v1.0",
              "promo-recap-tier0  · Way Day / BFCM (coming v1.1)",
-             "summit-case-study  · Multi-supplier showcase (coming v1.1)"])
+             "summit-case-study  · Multi-supplier showcase (coming v1.1)",
+             "mbr-supplier-review  · Internal MBR (coming v1.1)"])
+        # Lock the variant to match the storyboard
+        if storyboard.startswith("value-review"):
+            variant_default = 0
+        elif storyboard.startswith("restart-pitch"):
+            variant_default = 1
+        elif storyboard.startswith("switch-to-5pct"):
+            variant_default = 2
+        else:
+            variant_default = 3
+        variant = st.selectbox("Pitch Variant",
+            ["B · Continue at current pace",
+             "A · Restart / Re-activate",
+             "C · Move to 5% of WSC",
+             "D · Custom"],
+            index=variant_default)
         audience = st.radio("Audience",
             ["Supplier-facing (WSC only, no GRS)",
              "Internal (Wayfair leadership, GRS allowed) — coming v1.1"],
@@ -335,12 +351,23 @@ with tab_build:
             data['period']   = f.get("reporting_month") or data['period']
             data['srm']      = f.get("srm") or data.get('srm', 'the team')
 
+            # Pick the storyboard from the form (defaults to value-review-b)
+            sb_label = f.get("storyboard", "value-review-variant-b")
+            sb_key = sb_label.split()[0]  # take the first token, drops the "· Continue at pace · ✅"
+
+            # If Restart, augment data with the calendar story
+            if sb_key == "restart-pitch-variant-a":
+                data = _augment_for_restart(data, f.get("reporting_month", ""))
+            elif sb_key == "switch-to-5pct-variant-c":
+                data = _augment_for_switch_to_5pct(data)
+
             # Build the deck
             try:
                 with st.spinner(f"Building deck {source_note}..."):
-                    pptx_bytes = deck_builder.build_deck_value_review_b(data)
+                    pptx_bytes = deck_builder.build_deck(sb_key, data)
                 st.session_state["pptx_bytes"] = pptx_bytes
                 st.session_state["build_data"] = data
+                st.session_state["build_storyboard"] = sb_key
                 st.session_state["build_done"] = True
 
                 # Audit log
@@ -349,7 +376,7 @@ with tab_build:
                     "supplier": data['supplier'],
                     "suid": data.get('suid'),
                     "period": data['period'],
-                    "storyboard": f.get("storyboard", "value-review-variant-b"),
+                    "storyboard": sb_key,
                     "cm_champion": f.get("cm_champion"),
                     "source": source_note,
                     "deck_bytes": len(pptx_bytes),
@@ -382,15 +409,34 @@ with tab_preview:
         st.info("Build a deck first to see its preview here.")
     else:
         data = st.session_state.get("build_data", {})
-        st.markdown(f"### Preview · {data.get('supplier', 'Supplier')} · {data.get('period', '')}")
+        sb_key = st.session_state.get("build_storyboard", "value-review-variant-b")
+        st.markdown(f"### Preview · {data.get('supplier', 'Supplier')} · {data.get('period', '')} · {sb_key}")
 
-        # Render the 4 slide PNGs from the build_data and show in-app
-        for renderer, label in [
-            (deck_builder.render_cover,       "Slide 1 · Cover"),
-            (deck_builder.render_value_story, "Slide 2 · 01 · WHAT WSP IS DOING"),
-            (deck_builder.render_yoy_proof,   "Slide 3 · 02 · YoY proof"),
-            (deck_builder.render_ask,         "Slide 4 · 03 · WHERE WE GO FROM HERE"),
-        ]:
+        # Pick the slide list based on which storyboard was built
+        if sb_key == "restart-pitch-variant-a":
+            slides = [
+                (deck_builder.render_restart_cover,       "Slide 1 · Cover"),
+                (deck_builder.render_value_story,         "Slide 2 · 01 · WHAT WSP WAS DRIVING"),
+                (deck_builder.render_yoy_proof,           "Slide 3 · 02 · THE EVENT RECAP"),
+                (deck_builder.render_dark_days_calendar,  "Slide 4 · 03 · THE PROBLEM (dark-days calendar)"),
+                (deck_builder.render_restart_ask,         "Slide 5 · 04 · WHERE WE GO FROM HERE"),
+            ]
+        elif sb_key == "switch-to-5pct-variant-c":
+            slides = [
+                (deck_builder.render_cover,                 "Slide 1 · Cover"),
+                (deck_builder.render_value_story,           "Slide 2 · 01 · WHAT WSP IS DOING"),
+                (deck_builder.render_yoy_proof,             "Slide 3 · 02 · YoY proof"),
+                (deck_builder.render_switch_to_5pct_ask,    "Slide 4 · 03 · THE RULE"),
+            ]
+        else:  # value-review-variant-b
+            slides = [
+                (deck_builder.render_cover,       "Slide 1 · Cover"),
+                (deck_builder.render_value_story, "Slide 2 · 01 · WHAT WSP IS DOING"),
+                (deck_builder.render_yoy_proof,   "Slide 3 · 02 · YoY proof"),
+                (deck_builder.render_ask,         "Slide 4 · 03 · WHERE WE GO FROM HERE"),
+            ]
+
+        for renderer, label in slides:
             st.markdown(f"**{label}**")
             try:
                 slide_img = renderer(data)
@@ -453,10 +499,10 @@ with tab_help:
     storyboards = [
         ("value-review-variant-b", "Supplier at or above 4-5% benchmark · ask is 'continue at this pace'",
          "Monty Trading", "✅ Live in v1.0"),
-        ("restart-pitch-variant-a", "Supplier dark ≥2 months · ask is 'switch WSP back on'",
-         "TuttiBambini", "⏳ v1.1"),
+        ("restart-pitch-variant-a", "Supplier dark ≥2 months · ask is 'switch WSP back on' · uses the killer dark-days calendar viz",
+         "TuttiBambini", "✅ Live in v1.0"),
         ("switch-to-5pct-variant-c", "Supplier active but under-spending (<3%) · ask is 'lock in 5% rule'",
-         "(MBR drag list)", "⏳ v1.1"),
+         "(MBR drag list)", "✅ Live in v1.0"),
         ("promo-recap-tier0", "Way Day · BFCM · Cyber Week. Requires exact dates.",
          "TuttiBambini Way Day", "⏳ v1.1"),
         ("summit-case-study", "Multi-supplier public showcase · numbers stripped",
@@ -507,4 +553,67 @@ def _audit(entry: dict):
         with open(LOG_FILE, "a") as f:
             f.write(json.dumps(entry) + "\n")
     except Exception:
-        pass  # don't crash the build because we couldn't log
+        pass
+
+
+# -------------------------------------------------------------------------
+# Variant data augmentation
+# -------------------------------------------------------------------------
+def _augment_for_restart(data: dict, period: str) -> dict:
+    """Add the Variant A (Restart) specific fields:
+    cover line, calendar, missed-wholesale numbers, pillars.
+
+    Conservative defaults — CM can override after seeing the preview.
+    """
+    out = dict(data)
+    ratio = data['ws_roas']
+    out['cover_title'] = "Switch your WSP back on."
+    out['cover_subtitle'] = ("It was working — then it went dark. Here is what it drove for you, "
+                             "and the simple way to keep it on.")
+    out['event_window'] = period
+    out['event_name'] = 'recent event'
+
+    # KPI ribbon — 4th card is the loss in coral
+    out['kpis_cover'] = [
+        {'label': 'EVERY £1 OF WSP', 'value': f"£{ratio:.2f}", 'sub': 'in wholesale (pre-dark)'},
+        {'label': 'AT PEAK',          'value': '×2',   'sub': 'orders during the last live window'},
+        {'label': 'WHOLESALE LIFT',   'value': '+£22k', 'sub': 'vs the weeks before'},
+        {'label': 'DAYS WSP WENT DARK','value': '12',  'sub': 'recent dark stretch', 'is_loss': True},
+    ]
+    # Simple synthesised calendar — 30 days, last 12 are off
+    out['daily_calendar'] = (
+        [{'status': 'on', 'label': 'Day 1' if i == 0 else None, 'event': i in (8, 9, 10)} for i in range(11)] +
+        [{'status': 'off', 'label': 'Day 12' if i == 0 else None, 'event': False} for i in range(12)] +
+        [{'status': 'on', 'label': None, 'event': False} for i in range(7)]
+    )
+    out['missed_wholesale_text'] = f"~£{int(data.get('last_month_wsc', 100_000) * 0.05 / 1000 * 12 / 30):,}k"
+    out['missed_wholesale_caption'] = "of wholesale revenue likely missed over the dark days"
+    out['pillars'] = [
+        {'label': 'IT WORKS', 'hero': f"£{ratio:.2f} / £1",
+         'body': f'Every £1 of WSP has returned about £{ratio:.2f} in wholesale revenue this year.'},
+        {'label': 'GOING DARK COSTS YOU', 'hero': out['missed_wholesale_text'], 'is_loss': True,
+         'body': 'likely missed over the dark stretch. Off means £0 coming back.'},
+        {'label': 'A SIMPLE RULE', 'hero': '5%',
+         'body': "of last month's wholesale revenue, set as the budget on day 1 — so it never runs dry."},
+    ]
+    return out
+
+
+def _augment_for_switch_to_5pct(data: dict) -> dict:
+    """Add the Variant C (Switch-to-5%) specific fields."""
+    out = dict(data)
+    ratio = data['ws_roas']
+    pct = data.get('wsp_pct_wsc_latest', 0)
+    out['cover_title'] = "Your WSP is on. The rhythm needs a rule."
+    out['cover_subtitle'] = (f"Your WSP returns £{ratio:.2f} for every £1. "
+                             f"Right now spend is at {pct:.1f}% of wholesale. Here is the simple fix.")
+    out['ask_title'] = "One rule fixes lumpy spend — for every supplier on it."
+    out['pillars'] = [
+        {'label': 'IT WORKS', 'hero': f"£{ratio:.2f} / £1",
+         'body': f'Every £1 of WSP has returned about £{ratio:.2f} in wholesale revenue this year.'},
+        {'label': 'THE PORTFOLIO RULE', 'hero': '5%',
+         'body': "of last month's wholesale, set as the WSP budget on day 1. Every month. No drama."},
+        {'label': 'WHAT THE RULE UNLOCKS', 'hero': data.get('ask_amount_text', '~£X/mo'),
+         'body': 'set automatically from last month\'s landed wholesale — no negotiation needed.'},
+    ]
+    return out

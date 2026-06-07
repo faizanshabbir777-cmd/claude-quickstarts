@@ -387,3 +387,364 @@ def _fmt(v):
         return f"{v/1e3:.1f}k"
     else:
         return f"{v:.0f}"
+
+
+# =====================================================================
+# VARIANT A — RESTART PITCH
+# Mirrors the TuttiBambini Way Day deck: cover · value-was-driving ·
+# the-event-proved-it · the-problem (dark-days calendar) · the-ask.
+# =====================================================================
+
+# Coral palette for problem framing
+CORAL_T = (184, 58, 58)
+CORAL_LIGHT = (252, 232, 232)
+GREY_BAR = (207, 199, 214)
+
+
+def render_restart_cover(data: dict) -> Image.Image:
+    """Cover with 4 KPI cards; the 4th has a CORAL stripe (the loss)."""
+    img = Image.new("RGB", (W, H), tuple(DEEP_T))
+    d = ImageDraw.Draw(img)
+    here = Path(__file__).parent
+    logo_path = here / "assets" / "wayfair_logo_white.png"
+    if logo_path.exists():
+        logo = Image.open(logo_path).convert("RGBA")
+        logo.thumbnail((240, 100))
+        img.paste(logo, (M, 80), logo)
+
+    draw_ls(d, M, 220,
+            f"{data['supplier'].upper()}  ·  WAYFAIR SPONSORED PRODUCTS",
+            sans(26, bold=True), GOLD_T, sp=3)
+    d.text((M, 320), data.get('cover_title', "Switch your WSP back on."),
+           font=serif(115, bold=True), fill=WHITE_T)
+
+    sub = data.get('cover_subtitle',
+        "It was working — then it went dark. Here is what it drove for you, and the simple way to keep it on.")
+    sub_lines = wrap(d, sub, W - 2*M - 100, serif(38, italic=True))
+    for i, ln in enumerate(sub_lines[:2]):
+        d.text((M, 530 + i*55), ln, font=serif(38, italic=True), fill=WHITE_T)
+
+    card_y = 880; card_h = 320
+    card_w = (W - 2*M - 3*30) // 4
+    card_gap = 30
+    kpis = data['kpis_cover']
+    for i, kpi in enumerate(kpis[:4]):
+        cx = M + i * (card_w + card_gap)
+        d.rectangle([cx, card_y, cx + card_w, card_y + card_h], fill=LAV_T)
+        # CORAL stripe on the loss KPI (typically the 4th)
+        stripe_color = tuple(CORAL_T) if kpi.get('is_loss') else GOLD_T
+        d.rectangle([cx, card_y, cx + card_w, card_y + 10], fill=stripe_color)
+        draw_ls(d, cx + 35, card_y + 38, kpi['label'].upper(),
+                sans(20, bold=True),
+                tuple(CORAL_T) if kpi.get('is_loss') else PURPLE_T, sp=2)
+        value_color = tuple(CORAL_T) if kpi.get('is_loss') else DEEP_T
+        d.text((cx + 35, card_y + 95), kpi['value'],
+               font=serif(75, bold=True, italic=True), fill=value_color)
+        d.text((cx + 35, card_y + card_h - 70), kpi['sub'],
+               font=sans(20), fill=INK_T)
+
+    footer = f"{data.get('event_window', data['period'])}  ·  prepared for {data.get('srm','the team')}  ·  UK  ·  GBP"
+    d.text((M, H - 75), footer, font=sans(20), fill=(180, 165, 200))
+    return img
+
+
+def render_dark_days_calendar(data: dict) -> Image.Image:
+    """The killer slide — day-by-day purple/grey blocks showing dark days."""
+    img = Image.new("RGB", (W, H), WHITE_T)
+    d = ImageDraw.Draw(img)
+    draw_ls(d, M, 90, "03  ·  THE PROBLEM",
+            sans(22, bold=True), tuple(CORAL_T), sp=3)
+    d.text((M, 165),
+           data.get('problem_title',
+               f"Right after the event, your WSP went dark — and the orders stopped."),
+           font=serif(48, bold=True), fill=INK_T)
+
+    # Calendar instruction
+    d.text((M, 270),
+           "Each block is one day. Purple = WSP running. Grey = switched off.",
+           font=sans(22), fill=SLATE_T)
+
+    # The calendar
+    calendar = data.get('daily_calendar', [])
+    if calendar:
+        cal_top = 360; cal_bot = 620
+        cal_h = cal_bot - cal_top
+        n_days = len(calendar)
+        gap = 6
+        block_w = (W - 2*M - gap*(n_days-1)) // max(n_days, 1)
+        block_w = min(block_w, 50)  # cap at 50px for readability
+
+        # Annotations above (event window + dark window)
+        event_indices = [i for i, day in enumerate(calendar) if day.get('event')]
+        dark_indices = [i for i, day in enumerate(calendar) if day['status'] == 'off']
+
+        # Event tab in gold
+        if event_indices:
+            ex_start = M + event_indices[0] * (block_w + gap)
+            ex_end = M + (event_indices[-1]+1) * (block_w + gap) - gap
+            d.rectangle([ex_start, cal_top - 50, ex_end, cal_top - 30], fill=GOLD_T)
+            draw_ls(d, ex_start, cal_top - 90,
+                    data.get('event_name', 'EVENT').upper(),
+                    sans(18, bold=True), GOLD_T, sp=2)
+
+        # Dark stretch in coral
+        if dark_indices:
+            # Find longest contiguous run
+            longest_start, longest_len = 0, 0
+            cur_start, cur_len = dark_indices[0], 1
+            for j in range(1, len(dark_indices)):
+                if dark_indices[j] == dark_indices[j-1] + 1:
+                    cur_len += 1
+                else:
+                    if cur_len > longest_len:
+                        longest_start, longest_len = cur_start, cur_len
+                    cur_start, cur_len = dark_indices[j], 1
+            if cur_len > longest_len:
+                longest_start, longest_len = cur_start, cur_len
+
+            dx_start = M + longest_start * (block_w + gap)
+            dx_end = M + (longest_start + longest_len) * (block_w + gap) - gap
+            d.rectangle([dx_start, cal_top - 50, dx_end, cal_top - 30], fill=tuple(CORAL_T))
+            draw_ls(d, dx_start, cal_top - 90,
+                    f"{longest_len} DAYS DARK",
+                    sans(18, bold=True), tuple(CORAL_T), sp=2)
+
+        # Day blocks
+        for i, day in enumerate(calendar):
+            bx = M + i * (block_w + gap)
+            color = PURPLE_T if day['status'] == 'on' else GREY_BAR
+            d.rectangle([bx, cal_top, bx + block_w, cal_bot], fill=color)
+            # Date label every 7 days
+            if i % 7 == 0 or i == len(calendar) - 1:
+                date_lbl = day.get('label', '')
+                if date_lbl:
+                    d.text((bx, cal_bot + 12), date_lbl,
+                           font=sans(16), fill=SLATE_T)
+
+    # Bottom: two cards
+    card_y = 760; card_h = 320
+    card_w = (W - 2*M - 40) // 2
+
+    # LEFT — coral card "WHILE IT WAS DARK"
+    d.rectangle([M, card_y, M + card_w, card_y + card_h], fill=CORAL_LIGHT)
+    d.rectangle([M, card_y, M + 8, card_y + card_h], fill=tuple(CORAL_T))
+    draw_ls(d, M + 35, card_y + 40, "WHILE IT WAS DARK",
+            sans(22, bold=True), tuple(CORAL_T), sp=2)
+    missed_text = data.get('missed_wholesale_text', '~£15k')
+    d.text((M + 35, card_y + 100), missed_text,
+           font=serif(140, bold=True, italic=True), fill=tuple(CORAL_T))
+    d.text((M + 35, card_y + 270),
+           data.get('missed_wholesale_caption',
+               "of wholesale revenue likely missed over those days"),
+           font=sans(20), fill=INK_T)
+
+    # RIGHT — lavender "THE PATTERN"
+    rx = M + card_w + 40
+    d.rectangle([rx, card_y, rx + card_w, card_y + card_h], fill=LAV_T)
+    d.rectangle([rx, card_y, rx + 8, card_y + card_h], fill=PURPLE_T)
+    draw_ls(d, rx + 35, card_y + 40, "THE PATTERN",
+            sans(22, bold=True), PURPLE_T, sp=2)
+    d.text((rx + 35, card_y + 100), "On = sales",
+           font=serif(110, bold=True, italic=True), fill=DEEP_T)
+    d.text((rx + 35, card_y + 270),
+           "Off = silence. The budget keeps running out mid-month.",
+           font=sans(20), fill=INK_T)
+
+    # Takeaway
+    d.text((M, H - 80),
+           data.get('problem_takeaway',
+               "Every day WSP is off, you stop showing up to ready-to-buy shoppers — and a competitor takes that slot."),
+           font=serif(28, italic=True), fill=INK_T)
+    return img
+
+
+def render_restart_ask(data: dict) -> Image.Image:
+    """Restart variant Ask slide — same pattern as Variant B but with restart-specific pillars."""
+    img = Image.new("RGB", (W, H), WHITE_T)
+    d = ImageDraw.Draw(img)
+    draw_ls(d, M, 90, "04  ·  WHERE WE GO FROM HERE",
+            sans(22, bold=True), PURPLE_T, sp=3)
+    d.text((M, 165),
+           data.get('ask_title', "Restart WSP now — the maths still works."),
+           font=serif(58, bold=True), fill=INK_T)
+
+    card_y = 360; card_h = 520
+    card_w = (W - 2*M - 2*30) // 3
+    card_gap = 30
+    cards = data['pillars']
+    for i, card in enumerate(cards[:3]):
+        cx = M + i*(card_w + card_gap)
+        d.rectangle([cx, card_y, cx + card_w, card_y + card_h], fill=LAV_T)
+        d.rectangle([cx, card_y, cx + card_w, card_y + 10], fill=GOLD_T)
+        draw_ls(d, cx + 35, card_y + 40, card['label'],
+                sans(22, bold=True), PURPLE_T, sp=2)
+        # Coral hero if it's the "what going dark cost" pillar
+        hero_color = tuple(CORAL_T) if card.get('is_loss') else DEEP_T
+        d.text((cx + 35, card_y + 110), card['hero'],
+               font=serif(95, bold=True, italic=True), fill=hero_color)
+        body_lines = wrap(d, card['body'], card_w - 70, sans(24))
+        for j, ln in enumerate(body_lines):
+            d.text((cx + 35, card_y + 290 + j*36), ln, font=sans(24), fill=INK_T)
+
+    ask_y = 920; ask_h = 220
+    d.rectangle([M, ask_y, W - M, ask_y + ask_h], fill=DEEP_T)
+    draw_ls(d, M + 40, ask_y + 32, "THE ASK", sans(24, bold=True), GOLD_T, sp=3)
+    ask_amount = data['ask_amount_text']
+    last_wsc = _fmt(data['last_month_wsc'])
+    d.text((M + 40, ask_y + 80), "Switch WSP back on at  ", font=sans(40), fill=WHITE_T)
+    cw1, _ = tsize(d, "Switch WSP back on at  ", sans(40))
+    d.text((M + 40 + cw1, ask_y + 80), ask_amount,
+           font=sans(40, bold=True), fill=GOLD_T)
+    cw2, _ = tsize(d, ask_amount, sans(40, bold=True))
+    d.text((M + 40 + cw1 + cw2, ask_y + 80), "  —  5% of last month's",
+           font=sans(40), fill=WHITE_T)
+    d.text((M + 40, ask_y + 135),
+           f"wholesale revenue (£{last_wsc}), set on day 1 so it never goes dark mid-month.",
+           font=sans(40), fill=WHITE_T)
+
+    closing = data.get('ask_closing',
+        f"Proven £{data['ws_roas']:.2f} back for every £1  ·  currently leaving wholesale revenue on the table  ·  one rule, live on day 1.")
+    d.text((M, H - 80), closing, font=serif(28, italic=True), fill=INK_T)
+    return img
+
+
+def build_deck_restart_pitch_a(data: dict) -> bytes:
+    """Build a Variant A Restart pitch deck. Uses the dark-days calendar pattern."""
+    import tempfile
+    slides = [
+        render_restart_cover(data),
+        render_value_story(data),        # 01 · WHAT WSP WAS DRIVING (reuse)
+        render_yoy_proof(data),          # 02 · THE EVENT RECAP (reuse)
+        render_dark_days_calendar(data), # 03 · THE PROBLEM
+        render_restart_ask(data),        # 04 · WHERE WE GO FROM HERE
+    ]
+    from pptx import Presentation
+    from pptx.util import Inches
+    prs = Presentation()
+    prs.slide_width = Inches(13.333); prs.slide_height = Inches(7.5)
+    BLANK = prs.slide_layouts[6]
+    with tempfile.TemporaryDirectory() as td:
+        for i, slide_img in enumerate(slides):
+            if slide_img.mode != "RGB":
+                slide_img = slide_img.convert("RGB")
+            png_path = f"{td}/slide_{i}.png"
+            slide_img.save(png_path, "PNG", optimize=False)
+            s = prs.slides.add_slide(BLANK)
+            s.shapes.add_picture(png_path, 0, 0,
+                                  width=prs.slide_width,
+                                  height=prs.slide_height)
+        out = io.BytesIO(); prs.save(out); out.seek(0)
+        return out.read()
+
+
+# =====================================================================
+# VARIANT C — SWITCH TO 5% RULE
+# Same opening as Variant B, but slide 3 reframes as "what erratic spend cost"
+# and the ask is the budget-fixing rule rather than continuation.
+# =====================================================================
+
+def render_switch_to_5pct_ask(data: dict) -> Image.Image:
+    """Variant C Ask — fixes lumpy spend, frames the rule as the unlock."""
+    img = Image.new("RGB", (W, H), WHITE_T)
+    d = ImageDraw.Draw(img)
+    draw_ls(d, M, 90, "03  ·  WHERE WE GO FROM HERE",
+            sans(22, bold=True), PURPLE_T, sp=3)
+    d.text((M, 165),
+           data.get('ask_title', "One rule fixes lumpy spend — for every supplier on it."),
+           font=serif(58, bold=True), fill=INK_T)
+
+    card_y = 360; card_h = 520
+    card_w = (W - 2*M - 2*30) // 3
+    card_gap = 30
+    cards = data['pillars']
+    for i, card in enumerate(cards[:3]):
+        cx = M + i*(card_w + card_gap)
+        d.rectangle([cx, card_y, cx + card_w, card_y + card_h], fill=LAV_T)
+        d.rectangle([cx, card_y, cx + card_w, card_y + 10], fill=GOLD_T)
+        draw_ls(d, cx + 35, card_y + 40, card['label'],
+                sans(22, bold=True), PURPLE_T, sp=2)
+        hero_color = tuple(CORAL_T) if card.get('is_loss') else DEEP_T
+        d.text((cx + 35, card_y + 110), card['hero'],
+               font=serif(95, bold=True, italic=True), fill=hero_color)
+        body_lines = wrap(d, card['body'], card_w - 70, sans(24))
+        for j, ln in enumerate(body_lines):
+            d.text((cx + 35, card_y + 290 + j*36), ln, font=sans(24), fill=INK_T)
+
+    ask_y = 920; ask_h = 220
+    d.rectangle([M, ask_y, W - M, ask_y + ask_h], fill=DEEP_T)
+    draw_ls(d, M + 40, ask_y + 32, "THE ASK", sans(24, bold=True), GOLD_T, sp=3)
+    ask_amount = data['ask_amount_text']
+    last_wsc = _fmt(data['last_month_wsc'])
+    d.text((M + 40, ask_y + 80), "Set next month's WSP at  ", font=sans(40), fill=WHITE_T)
+    cw1, _ = tsize(d, "Set next month's WSP at  ", sans(40))
+    d.text((M + 40 + cw1, ask_y + 80), ask_amount,
+           font=sans(40, bold=True), fill=GOLD_T)
+    cw2, _ = tsize(d, ask_amount, sans(40, bold=True))
+    d.text((M + 40 + cw1 + cw2, ask_y + 80), "  —  5% of last 30 days'",
+           font=sans(40), fill=WHITE_T)
+    d.text((M + 40, ask_y + 135),
+           f"wholesale revenue (£{last_wsc}), set on day 1 — and every day 1 after.",
+           font=sans(40), fill=WHITE_T)
+
+    closing = data.get('ask_closing',
+        f"Proven £{data['ws_roas']:.2f} back for every £1  ·  the gap to benchmark is now closed  ·  one rule, live on day 1.")
+    d.text((M, H - 80), closing, font=serif(28, italic=True), fill=INK_T)
+    return img
+
+
+def build_deck_switch_to_5pct_c(data: dict) -> bytes:
+    """Build a Variant C Switch-to-5% deck. Same data shape as Variant B."""
+    import tempfile
+    slides = [
+        render_cover(data),
+        render_value_story(data),
+        render_yoy_proof(data),
+        render_switch_to_5pct_ask(data),
+    ]
+    from pptx import Presentation
+    from pptx.util import Inches
+    prs = Presentation()
+    prs.slide_width = Inches(13.333); prs.slide_height = Inches(7.5)
+    BLANK = prs.slide_layouts[6]
+    with tempfile.TemporaryDirectory() as td:
+        for i, slide_img in enumerate(slides):
+            if slide_img.mode != "RGB":
+                slide_img = slide_img.convert("RGB")
+            png_path = f"{td}/slide_{i}.png"
+            slide_img.save(png_path, "PNG", optimize=False)
+            s = prs.slides.add_slide(BLANK)
+            s.shapes.add_picture(png_path, 0, 0,
+                                  width=prs.slide_width,
+                                  height=prs.slide_height)
+        out = io.BytesIO(); prs.save(out); out.seek(0)
+        return out.read()
+
+
+# =====================================================================
+# Dispatcher — picks the right builder based on storyboard name
+# =====================================================================
+def build_deck(storyboard: str, data: dict) -> bytes:
+    """Dispatch to the right builder based on storyboard name.
+
+    Args:
+        storyboard: storyboard name (with or without .md extension)
+        data: structured data dict from data_prep
+
+    Returns:
+        .pptx bytes
+
+    Raises:
+        ValueError: if no builder is registered for the storyboard
+    """
+    key = storyboard.replace('.md', '').strip().split()[0]
+    builders = {
+        'value-review-variant-b':   build_deck_value_review_b,
+        'restart-pitch-variant-a':  build_deck_restart_pitch_a,
+        'switch-to-5pct-variant-c': build_deck_switch_to_5pct_c,
+    }
+    if key not in builders:
+        raise ValueError(
+            f"No builder for storyboard '{key}' yet. Available: {list(builders)}. "
+            f"Other storyboards (promo-recap, summit, MBR) ship in v1.1."
+        )
+    return builders[key](data)
