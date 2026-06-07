@@ -148,10 +148,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# Sub-banner — pilot scope reminder
-st.info("**Pilot v0.1** — the Build button currently returns a hardcoded Monty Trading demo deck "
-        "so you can see the full UX flow. Real pipeline (data-prep → author → render) wires in pilot week 2. "
-        "Drop feedback in `#wsp-pilot` Slack channel.")
+# Sub-banner — pilot scope reminder + demo-data warning
+st.warning(
+    "**⚠️ Pilot v0.1 · DEMO DATA ONLY** — do not upload real supplier data on this URL. "
+    "The Build button currently returns a hardcoded Monty Trading demo deck so you can see "
+    "the full UX flow. Real personalised builds + real-data uploads happen on the Wayfair-internal "
+    "deployment in pilot week 2. Full data safety doc: "
+    "[DATA_SAFETY.md](https://github.com/faizanshabbir777-cmd/claude-quickstarts/blob/main/wayfair-eu-supplier-marketing/dashboard/DATA_SAFETY.md). "
+    "Feedback in `#wsp-pilot` Slack channel."
+)
 
 
 # -------------------------------------------------------------------------
