@@ -25,7 +25,7 @@ Three transition gates. Sophie owns the readiness of each.
 - ✅ Three live storyboards via Build button (Value Review · Restart · Switch-to-5%)
 - ✅ Audit-confirmed zero Claude / Anthropic API dependencies in the runtime
 - ✅ Real personalised builds from CSV uploads
-- ✅ Brian's runbook for 7-week leave coverage
+- ✅ Brian's runbook for 6-week leave coverage
 
 **What CM Champions do:**
 
